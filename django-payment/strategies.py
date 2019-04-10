@@ -3,14 +3,13 @@ Created on Jan 7, 2014
 
 @author: pochangl
 '''
-from payment.backends.base import NoBackEndFound
-from payment.backends.utils import find_backends
+from .backends.base import NoBackEndFound
+from .backends.utils import find_backends
 from django.conf import settings
 import traceback
 import sys
 
-available_backends = find_backends()
-
+backends = find_backends()
 
 class OffsiteStrategy(object):
     '''
@@ -29,7 +28,7 @@ class OffsiteStrategy(object):
         try:
             setattr(self,
                     "payment_backend",
-                    available_backends[backend_name](self.request))
+                    backends[backend_name](self.request))
         except KeyError:
             raise NoBackEndFound(backend_name)
         return self.payment_backend

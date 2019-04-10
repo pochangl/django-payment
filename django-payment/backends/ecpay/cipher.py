@@ -2,7 +2,7 @@ from binascii import hexlify, unhexlify
 import base64
 
 from Crypto.Cipher import AES
-from payment.backends.allpay.settings import settings
+from payment.backends.ecpay.settings import settings
 
 
 class InvalidBlockSizeError(Exception):

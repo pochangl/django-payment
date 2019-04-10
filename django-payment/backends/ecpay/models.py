@@ -1,10 +1,9 @@
 from django.db import models
 
-from custom.models import TimeStampedModel
-# from payment.models import PaymentModel
+from payment.models import TimeStampedModel
 
 
-class AllpayReceive(TimeStampedModel):
+class ECPayReceive(TimeStampedModel):
     MerchantID = models.CharField(max_length=10)
     MerchantTradeNo = models.CharField(max_length=20)
     RtnCode = models.IntegerField()

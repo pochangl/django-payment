@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'payment.backends.ecpay',
 ]
 
 MIDDLEWARE = [
@@ -78,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'payment',
         'CONN_MAX_AGE': 10,
-        'HOST': '10.0.0.2',
+        'HOST': '10.3.0.2',
         'PORT': '3306'
     }
 }
@@ -121,3 +122,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+#
+PAYMENT = {
+    'ECPAY': {
+        'MERCHANT_ID': '2000132',
+        'HASH_KEY': '5294y06JbISpM5x9',
+        'HASH_IV': 'v77hoKGq4kWxNNIS',
+        'PAYMENT_EXPIRE_DAYS': 7,
+    }
+}

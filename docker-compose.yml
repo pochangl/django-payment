@@ -1,18 +1,17 @@
 version: '3.2'
 services:
   server:
-    build: ../engintl
-    ports:
-      - 8000:8000
+    build: ./test-server
+    command: sleep 10000000
     volumes:
       - ./test-server:/mnt/server
       - ./test-server/test.sh:/test.sh
-      - ./django-payment:/mnt/payment
+      - ./:/mnt/payment
     depends_on:
       - db
     networks:
       backend:
-        ipv4_address: 10.0.0.1
+        ipv4_address: 10.3.0.3
 
   db:
     image: mariadb
@@ -21,11 +20,11 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     networks:
       backend:
-        ipv4_address: 10.0.0.2
+        ipv4_address: 10.3.0.2
 
 networks:
   backend:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.0.0.0/16
+        - subnet: 10.3.0.0/16

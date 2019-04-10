@@ -1,11 +1,14 @@
 import inspect
 from django.core.exceptions import ValidationError
-from django.utils.timzone import now
-from payment.models import Order
-from payment.exceptions import DuplicatePayment
+from django.utils.timezone import now
+from .models import Order
+from .exceptions import DuplicatePayment
 
 
 def update_order(details):
+    '''
+        mark order received
+    '''
     try:
         order = Order.objects.get(order_no=details["order_no"])
     except Order.DoesNotExist:

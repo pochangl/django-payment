@@ -1,14 +1,17 @@
-from django.db import models
-from custom.models import TimeStampedModel
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from django.shortcuts import reverse
 
 
-class PreservedTupleMixin(object):
-    def delete(self, *args, **kwargs):
-        class PreservedTuple(Exception):
-            pass
-        raise PreservedTuple("The tuple ought not to be delete")
+class TimeStampedModel(models.Model):
+    time_created = models.DateTimeField(auto_now_add=True)
+    time_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
 
 
 class PaymentErrorLog(TimeStampedModel):
@@ -37,57 +40,33 @@ class PaymentErrorLog(TimeStampedModel):
         return super(PaymentErrorLog, self).save()
 
 
-class Order(PreservedTupleMixin, custom_models.TimeStampedModel):
-    objects = managers.OrderManager()
-
+class Order(TimeStampedModel):
     order_no = models.CharField(max_length=20, blank=True, unique=True,
                                 null=True)
     backend = models.CharField(max_length=64, blank=True, null=True)
     owner = models.ForeignKey('auth.User', related_name="orders")
-    coupon = models.ForeignKey(Coupon, null=True, blank=True, default=None,
-                               related_name="orders")
+
     payment_amount = models.PositiveIntegerField()
-    commission = models.PositiveIntegerField(default=0)
     additional_fee = models.PositiveIntegerField(default=0)
     title = models.CharField(max_length=200, blank=True)
     description = models.CharField(max_length=200, blank=True)
     payment_received = models.DateTimeField(blank=True, null=True)
 
+    # content
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
     def clean(self):
-        desc = "%s-%s: %s" % (self.course.title, self.course.title_ext,
-                              self.package.description)
-        setattr(self, "description", desc[0:200])
-        setattr(self, "title", self.course.title[0:200])
-        setattr(self, "order_no", order_no_generator(self))
+        info = self.content_object.product_info
+        setattr(self, "description", info['description'])
+        setattr(self, "title", info['title'])
+        setattr(self, "order_no", info['prefix'] + self.pk)
+        
 
-    @property
-    def user_return_url(self):
-        return reverse('course_view', kwargs={"course_slug": self.course.slug})
+class Product(models.Model):
+    def get_absolute_url(self):
+        return reverse(self.view_name, kwargs={'id': self.pk})
 
-    def save(self, *args, **kwargs):
-        ret = super(Order, self).save(*args, **kwargs)
-
-        if self.coupon and self.payment_received:
-            # update self.coupon.used
-            self.coupon.save()
-        return ret
-
-    @classmethod
-    def setup_free_order(cls, **kwargs):
-        initial_val = {
-            "backend": None,
-            "payment_amount": 0,
-        }
-        initial_val.update(kwargs)
-        order = Order.objects.create(**initial_val)
-        order.full_clean()
-        order.save(force_update=True)
-        order.order_no = "free%s" % order.id
-        order.save()
-
-        details = {"order_no": "%s" % order.order_no,
-                   "payment_amount": 0,
-                   "additional_fee": 0,
-                   "is_simulation": False,
-                   "payment_type": "free"}
-        receive_payment(details)
+    class Meta:
+        abstract = True

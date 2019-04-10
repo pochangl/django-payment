@@ -10,12 +10,12 @@ Replace this with more appropriate tests for your application.
 """
 
 from payment.tests import PNTestBase
-from payment.backends.allpay.settings import settings
-from payment.backends.allpay.utils import get_CheckMacValue
-from payment.backends.allpay import forms
+from payment.backends.ecpay.settings import settings
+from payment.backends.ecpay.utils import get_CheckMacValue
+from payment.backends.ecpay import forms
 
 
-available_allpay_pns = [
+available_ecpay_pns = [
     {
         "MerchantID": settings.MerchantID,
         "MerchantTradeNo": u"meowmeowmeow",
@@ -70,7 +70,7 @@ available_allpay_pns = [
     }
     ]
 
-invalid_allpay_fields = [
+invalid_ecpay_fields = [
     ("MerchantID", "%s%s" % (settings.MerchantID, "0")),
     ("MerchantID", settings.MerchantID[0:len(settings.MerchantID)-1]),
     ("MerchantID", "%s%s" %
@@ -99,11 +99,11 @@ invalid_allpay_fields = [
     ]
 
 
-class AllPayTestBase(PNTestBase):
-    available_pns = available_allpay_pns
-    invalid_fields = invalid_allpay_fields
-    backend_name = "allpay_aio"
-    pn_form = forms.AllPayAIOPNForm
+class ECPayTestBase(PNTestBase):
+    available_pns = available_ecpay_pns
+    invalid_fields = invalid_ecpay_fields
+    backend_name = "ecpay_aio"
+    pn_form = forms.ECPayAIOPNForm
 
     def clean_invalid_inputs(self, invalid_input):
         invalid_input["CheckMacValue"] = get_CheckMacValue(invalid_input)

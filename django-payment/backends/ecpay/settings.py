@@ -5,15 +5,16 @@
 from django.conf import settings as global_settings
 import sys
 
+production_settings = global_settings.PAYMENT['ECPAY']
 
-class AllpaySettings():
-    MerchantID = global_settings.ALLPAY_MERCHANT_ID
-    HashKey = global_settings.ALLPAY_HASH_KEY
-    HashIV = global_settings.ALLPAY_HASH_IV
-    ExpireDays = global_settings.ALLPAY_PAYMENT_EXPIRE_DAYS
+class ECPaySettings():
+    MerchantID = production_settings['MERCHANT_ID']
+    HashKey = production_settings['HASH_KEY']
+    HashIV = production_settings['HASH_IV']
+    ExpireDays = production_settings['PAYMENT_EXPIRE_DAYS']
     TEST = False
-    AioCheckOut_URL = global_settings.ALLPAY_AIO_CHECKOUT_URL
-    LookUpURL = "https://payment.allpay.com.tw/Cashier/QueryTradeInfo"
+    AioCheckOut_URL = "https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5"
+    LookUpURL = "https://payment.ecpay.com.tw/Cashier/QueryTradeInfo/V5"
 
     DateTimeFormats = ['%Y/%m/%d %H:%M:%S']
     PaymentType = "aio"
@@ -38,7 +39,7 @@ class AllpaySettings():
         "10200003": "Trade Status Error. 交易狀態錯誤",
         "10200005": "Price Format Error. 金額格式錯誤",
         "10200007": "ItemURL Format Error. URL 格式錯誤",
-        "10200050": "AllPayTradeID Error. AllPay 交易編號錯誤",
+        "10200050": "ECPayTradeID Error. ecpay 交易編號錯誤",
         "10200051": "MerchantID Error. 廠商編號錯誤",
         "10200052": "MerchantTradeNo Error. 廠商交易編號錯誤",
         "10100001": "IP Access Denied. IP 拒絕存取",
@@ -50,17 +51,13 @@ class AllpaySettings():
         "10100059": "Trading Number cannot Be Found. 找不到訂單編號",
     }
 
-
-class AllpayTestSettings(AllpaySettings):
-    MerchantID = global_settings.ALLPAY_TEST_MERCHANT_ID
-    HashKey = global_settings.ALLPAY_TEST_HASH_KEY
-    HashIV = global_settings.ALLPAY_TEST_HASH_IV
-    AioCheckOut_URL = global_settings.ALLPAY_TEST_AIO_CHECKOUT_URL
-    LookUpURL = "http://payment-stage.allpay.com.tw/Cashier/QueryTradeInfo"
+class ECPayTestSettings(ECPaySettings):
+    AioCheckOut_URL = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5"
+    LookUpURL = "https://payment-stage.ecpay.com.tw/Cashier/QueryTradeInfo/V5"
     Test = True
 
 
-if global_settings.ALLPAY_TEST or "test" in sys.argv:
-    settings = AllpayTestSettings
+if production_settings.ECPAY_TEST or "test" in sys.argv:
+    settings = ECPayTestSettings
 else:
-    settings = AllpaySettings
+    settings = ECPaySettings

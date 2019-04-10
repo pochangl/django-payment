@@ -7,7 +7,7 @@ import datetime
 import hashlib
 import urllib
 import string
-from payment.backends.allpay.settings import settings
+from .settings import settings
 
 
 def get_CheckMacValue(fields, field_name="CheckMacValue"):

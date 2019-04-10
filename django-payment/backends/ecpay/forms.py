@@ -1,15 +1,15 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-
-from django import forms
-from payment.backends.allpay.models import AllpayReceive
-from payment.backends.allpay.settings import settings
-from payment.backends.allpay.utils import get_CheckMacValue
 import datetime
 import string
 import calendar
 import re
+
+from django import forms
 from django.core.exceptions import ValidationError
+from .models import ECPayReceive
+from .settings import settings
+from .utils import get_CheckMacValue
 
 
 class CMVGenMixin(object):
@@ -33,7 +33,7 @@ class CMVCheckMixin(object):
             return cleaned_data
 
 
-class AllPayAIOPNForm(CMVCheckMixin, forms.ModelForm):
+class ECPayAIOPNForm(CMVCheckMixin, forms.ModelForm):
     # form for receive all pay payment notiifcation
 
     PaymentDate = forms.DateTimeField(input_formats=settings.DateTimeFormats,)
@@ -59,12 +59,12 @@ class AllPayAIOPNForm(CMVCheckMixin, forms.ModelForm):
             return self.cleaned_data["MerchantID"]
 
     class Meta:
-        model = AllpayReceive
+        model = ECPayReceive
         datetime_format = settings.DateTimeFormats
         fields = '__all__'
 
 
-class AllPayPayForm(CMVGenMixin, forms.Form):
+class ECPayPayForm(CMVGenMixin, forms.Form):
     CheckMacValue = forms.CharField(required=False)
     submit_url = settings.AioCheckOut_URL
     MerchantID = forms.CharField(initial=settings.MerchantID, max_length=10,
@@ -95,42 +95,19 @@ class AllPayPayForm(CMVGenMixin, forms.Form):
             data["MerchantTradeDate"] = \
                 data["MerchantTradeDate"].strftime(settings.DateTimeFormats[0])
         data["MerchantID"] = settings.MerchantID
-        super(AllPayPayForm, self).__init__(data=data, *args, **kwargs)
+        super(ECPayPayForm, self).__init__(data=data, *args, **kwargs)
 
     class Meta:
         abstract = True
 
 
-class AllPayATMForm(AllPayPayForm):
-    ExpireDate = forms.IntegerField(max_value=settings.ExpireDays,
-                                    min_value=settings.ExpireDays)
-
-
-class AllPayCVSForm(AllPayPayForm):
-    Desc_1 = forms.CharField(max_length=20, required=True)
-    Desc_2 = forms.CharField(max_length=20, required=False)
-    Desc_3 = forms.CharField(max_length=20, required=False)
-    Desc_4 = forms.CharField(max_length=20, required=False)
-
-
-class AllPayBARCODEForm(AllPayCVSForm):
-    pass
-
-
-class AllPayCreditForm(AllPayPayForm):
-    pass
-    # CreditInstallment = forms.IntegerField(initial=0)
-    # InstallmentAmount = forms.FloatField(initial=0)
-    # Redeem = forms.CharField(max_length=1, initial="N")
-
-
-class AllPayAIOLookUpForm(CMVGenMixin, forms.Form):
+class ECPayAIOLookUpForm(CMVGenMixin, forms.Form):
     MerchantID = forms.CharField(max_length=10)
     MerchantTradeNo = forms.CharField(max_length=20)
     TimeStamp = forms.IntegerField(min_value=0)
 
     def __init__(self, *args, **kwargs):
-        super(AllPayAIOLookUpForm, self).__init__(*args, **kwargs)
+        super(ECPayAIOLookUpForm, self).__init__(*args, **kwargs)
         self.data["MerchantID"] = settings.MerchantID
         self.data["TimeStamp"] = \
             calendar.timegm(datetime.datetime.now().utctimetuple())
