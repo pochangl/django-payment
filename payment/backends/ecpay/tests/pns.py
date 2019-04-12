@@ -13,6 +13,7 @@ from payment.tests import PNTestBase
 from payment.backends.ecpay.settings import settings
 from payment.backends.ecpay.utils import get_CheckMacValue
 from payment.backends.ecpay import forms
+from payment.models import Order
 
 
 available_ecpay_pns = [
@@ -93,3 +94,12 @@ class ECPayTestBase(PNTestBase, TestCase):
 
     def assert_valid_response(self, response):
         self.assertEqual(response.content, b'1|OK', response.content)
+
+    def test_pn(self):
+        order = Order.objects.get()
+        self.assertEqual(order.additional_fee, 0)
+        self.assertIsNone(order.payment_received)
+        super().test_pn()
+
+        self.assertEqual(order.additional_fee, 1.00)
+        self.assertIsNotNone(order.payment_received)
