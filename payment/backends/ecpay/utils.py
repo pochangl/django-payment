@@ -10,9 +10,8 @@ import string
 from .settings import settings
 
 
-def get_CheckMacValue(fields, field_name="CheckMacValue"):
-    process_fields = dict(fields.items())
-    process_fields.pop(field_name, None)
+def generate_CheckMacValue(dictionary, key, iv):
+    process_fields = dictionary
 
     sorted_fields = sorted(process_fields.items())
     sorted_fields.insert(0, ("HashKey", settings.HashKey))
@@ -27,19 +26,21 @@ def get_CheckMacValue(fields, field_name="CheckMacValue"):
         else:
             urlencoded_string = "%s=%s" % (a, b)
 
-    # print urlencoded_string.encode('utf-8')
-    urlencoded_string = \
-        urllib.quote_plus(urlencoded_string.encode('utf-8'), '')
+    urlencoded_string = urllib.parse.quote_plus(urlencoded_string, '')
 
-    md5_input = string.lower(urlencoded_string)
+    md5_input = urlencoded_string.lower().encode('utf-8')
+    hasher = hashlib.sha256()
+    hasher.update(md5_input)
+    return hasher.hexdigest().upper()
 
-    hash_obj = hashlib.md5(md5_input)
 
-    return string.upper(hash_obj.hexdigest())
+def get_CheckMacValue(fields, field_name="CheckMacValue"):
+    process_fields = dict(fields.items())
+    process_fields.pop(field_name, None)
+    return generate_CheckMacValue(dictionary=process_fields, key=settings.HashKey, iv=settings.HashIV)
 
 
 def decode_params(params_string):
-
     params = {}
     for param in params_string.split('&'):
         field_name, value = param.split('=')

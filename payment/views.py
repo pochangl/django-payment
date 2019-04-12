@@ -11,7 +11,7 @@ from django.views.generic import View, FormView
 from django.views.decorators.csrf import csrf_exempt
 from .models import PaymentErrorLog
 from .strategies import OffsiteStrategy
-from . import receive_payment
+from .pipes import receive_payment
 from .forms import BuyForm
 
 class PNView(View):

@@ -2,11 +2,11 @@ version: '3.2'
 services:
   server:
     build: ./test-server
-    command: sleep 10000000
+    # command: sleep 10000000
     volumes:
       - ./test-server:/mnt/server
       - ./test-server/test.sh:/test.sh
-      - ./:/mnt/payment
+      - ./payment:/mnt/server/payment
     depends_on:
       - db
     networks:

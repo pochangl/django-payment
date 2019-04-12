@@ -8,7 +8,7 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
-
+from django.test import TestCase
 from payment.tests import PNTestBase
 from payment.backends.ecpay.settings import settings
 from payment.backends.ecpay.utils import get_CheckMacValue
@@ -18,57 +18,18 @@ from payment.backends.ecpay import forms
 available_ecpay_pns = [
     {
         "MerchantID": settings.MerchantID,
-        "MerchantTradeNo": u"meowmeowmeow",
+        "MerchantTradeNo": u"15550464430000024",
         "RtnCode": u"1",
-        "RtnMsg": u"喵1",
-        "TradeNo": u"1401100304547408",
-        "TradeAmt": u"193",
-        "PaymentDate": u"2014/01/10 03:06:41",
+        "RtnMsg": u"",
+        "TradeNo": u"1904121320432293",
+        "TradeAmt": u"700",
+        "PaymentDate": u"2019/04/12 13:21:22",
         "PaymentType": u"Credit_CreditCard",
-        "PaymentTypeChargeFee": u"0",
-        "TradeDate": u"2014/01/10 03:04:54",
-        "SimulatePaid": u"0",
-    },
-    {
-        "MerchantID": settings.MerchantID,
-        "MerchantTradeNo": u"meowmeowmeow2",
-        "RtnCode": u"1",
-        "RtnMsg": u"喵二",
-        "TradeNo": u"1401131630470735",
-        "TradeAmt": u"199",
-        "PaymentDate": u"2014/01/13 16:30:47",
-        "PaymentType": u"Credit_CreditCard",
-        "PaymentTypeChargeFee": u"0",
-        "TradeDate": u"2014/01/13 16:30:47",
-        "SimulatePaid": u"0",
-    },
-    {
-        "MerchantID": settings.MerchantID,
-        "MerchantTradeNo": u"kjhn2398kd",
-        "RtnCode": u"1",
-        "RtnMsg": u"第三",
-        "TradeNo": u"1401100147537403",
-        "TradeAmt": u"123",
-        "PaymentDate": u"2014/01/10 01:51:25",
-        "PaymentType": u"Credit_CreditCard",
-        "PaymentTypeChargeFee": u"0",
-        "TradeDate": u"2014/01/10 01:47:53",
-        "SimulatePaid": u"0",
-    },
-    {
-        "MerchantID": settings.MerchantID,
-        "MerchantTradeNo": u"kjhn2398kc",
-        "RtnCode": u"1",
-        "RtnMsg": u"第四",
-        "TradeNo": u"1401100204396998",
-        "TradeAmt": u"123",
-        "PaymentDate": u"2014/01/10 02:06:20",
-        "PaymentType": u"Credit_CreditCard",
-        "PaymentTypeChargeFee": u"0",
-        "TradeDate": u"2014/01/10 02:04:39",
+        "PaymentTypeChargeFee": u"1.00",
+        "TradeDate": u"2019/04/12 13:21:03",
         "SimulatePaid": u"0",
     }
-    ]
+]
 
 invalid_ecpay_fields = [
     ("MerchantID", "%s%s" % (settings.MerchantID, "0")),
@@ -78,7 +39,7 @@ invalid_ecpay_fields = [
     ("MerchantTradeNo", "meowmeowmeo"),
     ("RtnCode", "0"),
     ("RtnCode", "2"),
-    ("RtnMsg", ""),
+    # ("RtnMsg", "喵1"),
     # ("TradeNo", "140110030454740700000"),
     # ("TradeNo", "14011003045474070000"),
     # ("TradeNo", "1401100304547407"),
@@ -99,11 +60,25 @@ invalid_ecpay_fields = [
     ]
 
 
-class ECPayTestBase(PNTestBase):
+class ECPayTestBase(PNTestBase, TestCase):
     available_pns = available_ecpay_pns
     invalid_fields = invalid_ecpay_fields
     backend_name = "ecpay_aio"
     pn_form = forms.ECPayAIOPNForm
+
+    def create_order(self, **kwargs):
+        super().create_order(
+            backend=self.backend_name,
+            **kwargs
+        )
+
+    def setUp(self):
+        super().setUp()
+        for pns in self.available_pns:
+            self.create_order(
+                order_no=pns['MerchantTradeNo'],
+                payment_amount=pns['TradeAmt'],
+            )
 
     def clean_invalid_inputs(self, invalid_input):
         invalid_input["CheckMacValue"] = get_CheckMacValue(invalid_input)
@@ -114,7 +89,7 @@ class ECPayTestBase(PNTestBase):
         return valid_input
 
     def assert_invalid_response(self, response):
-        self.assertEqual(response.content[0:2], "0|", response.content)
+        self.assertEqual(response.content[0:2], b'0|', response.content)
 
     def assert_valid_response(self, response):
-        self.assertEqual(response.content, "1|OK", response.content)
+        self.assertEqual(response.content, b'1|OK', response.content)

@@ -27,7 +27,7 @@ class CMVCheckMixin(object):
     def clean(self):
         cleaned_data = super(CMVCheckMixin, self).clean()
         CheckMacValue = get_CheckMacValue(self.data)
-        if CheckMacValue != string.upper(self.data["CheckMacValue"]):
+        if CheckMacValue != self.data["CheckMacValue"].upper():
             raise ValidationError("MacValue Doesn't match")
         else:
             return cleaned_data
@@ -95,7 +95,7 @@ class ECPayPayForm(CMVGenMixin, forms.Form):
             data["MerchantTradeDate"] = \
                 data["MerchantTradeDate"].strftime(settings.DateTimeFormats[0])
         data["MerchantID"] = settings.MerchantID
-        super(ECPayPayForm, self).__init__(data=data, *args, **kwargs)
+        super().__init__(data=data, *args, **kwargs)
 
     class Meta:
         abstract = True

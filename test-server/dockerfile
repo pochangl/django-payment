@@ -1,11 +1,11 @@
 From python:3.6
 
-RUN pip install django==1.11.13
-RUN pip install mysqlclient==1.3.9
+RUN pip install django==1.11.13 mysqlclient==1.3.9 requests
+
 RUN mkdir /mnt/server
 RUN mkdir /mnt/payment
 
 RUN echo '' > /test.sh
 
-WORKDIR /
+WORKDIR /mnt/server
 CMD /test.sh

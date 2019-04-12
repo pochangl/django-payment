@@ -2,7 +2,7 @@ import setuptools
 
 
 setuptools.setup(
-    name='payment',
+    name='Payment',
     version='0.0.1',
     author='Pochang Lee',
     author_email='stupidgod08@yahoo.com.tw',
@@ -10,7 +10,14 @@ setuptools.setup(
     long_description='A django package made for handling third party payment',
     long_description_content_type='text/markdown',
     url='https://github.com/pochangl/django-payment',
-    packages=setuptools.find_packages(),
+    install_requires=[
+        'django',
+        'mysqlclient',
+        'requests',
+    ],
+    packages=[
+        'payment'
+    ],
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

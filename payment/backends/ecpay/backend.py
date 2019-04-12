@@ -46,8 +46,7 @@ class ECPayAIOBackend(PaymentBackend):
                  inspect.currentframe().f_back.f_lineno,
                  form.errors))
 
-    def get_ALL_payment_form(self, order,
-                                form_class=ECPayPayForm):
+    def get_ALL_payment_form(self, order, form_class=ECPayPayForm):
         form = form_class(data={
             "MerchantTradeNo": order.order_no,
             "MerchantTradeDate": format_time(order.time_created),
@@ -72,7 +71,7 @@ class ECPayAIOBackend(PaymentBackend):
         response = request("POST",
                            settings.LookUpURL,
                            data=lookup_form.cleaned_data)
-        params = decode_params(response.content)
+        params = decode_params(response.content.decode('utf-8'))
         status = params["TradeStatus"]
         pn_form.handling_fee = float(params["HandlingCharge"])
         if int(params["TradeAmt"]) != pn_form.cleaned_data["TradeAmt"]:
@@ -89,7 +88,7 @@ class ECPayAIOBackend(PaymentBackend):
 
     @property
     def is_test(self):
-        return super(ECPayAIOBackend, self).is_debug and settings.Test
+        return super().is_debug and settings.Test
 
     def valid_response(self):
         return HttpResponse("1|OK")

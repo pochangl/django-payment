@@ -5,7 +5,7 @@
 from django.conf import settings as global_settings
 import sys
 
-production_settings = global_settings.PAYMENT['ECPAY']
+production_settings = global_settings.PAYMENT['BACKENDS']['ECPAY']
 
 class ECPaySettings():
     MerchantID = production_settings['MERCHANT_ID']
@@ -57,7 +57,7 @@ class ECPayTestSettings(ECPaySettings):
     Test = True
 
 
-if production_settings.ECPAY_TEST or "test" in sys.argv:
+if "test" in sys.argv or production_settings.get('test', False):
     settings = ECPayTestSettings
 else:
     settings = ECPaySettings

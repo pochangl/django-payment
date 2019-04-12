@@ -41,10 +41,11 @@ class PaymentErrorLog(TimeStampedModel):
 
 
 class Order(TimeStampedModel):
+    owner = models.ForeignKey('auth.User', related_name="orders")
+    
     order_no = models.CharField(max_length=20, blank=True, unique=True,
                                 null=True)
     backend = models.CharField(max_length=64, blank=True, null=True)
-    owner = models.ForeignKey('auth.User', related_name="orders")
 
     payment_amount = models.PositiveIntegerField()
     additional_fee = models.PositiveIntegerField(default=0)
@@ -64,7 +65,7 @@ class Order(TimeStampedModel):
         setattr(self, "order_no", info['prefix'] + self.pk)
         
 
-class Product(models.Model):
+class ProductBase(models.Model):
     def get_absolute_url(self):
         return reverse(self.view_name, kwargs={'id': self.pk})
 

@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'payment',
     'payment.backends.ecpay',
+    'product',
 ]
 
 MIDDLEWARE = [
@@ -126,10 +128,19 @@ STATIC_URL = '/static/'
 
 #
 PAYMENT = {
-    'ECPAY': {
-        'MERCHANT_ID': '2000132',
-        'HASH_KEY': '5294y06JbISpM5x9',
-        'HASH_IV': 'v77hoKGq4kWxNNIS',
-        'PAYMENT_EXPIRE_DAYS': 7,
-    }
+    'BACKENDS': {
+        'ECPAY': {
+            'MERCHANT_ID': '2000132',
+            'HASH_KEY': '5294y06JbISpM5x9',
+            'HASH_IV': 'v77hoKGq4kWxNNIS',
+            'PAYMENT_EXPIRE_DAYS': 7,
+            'TEST': True
+        }
+    },
+    'PAYMENT_BACKENDS': [
+        'payment.backends.ecpay.backend.ECPayAIOBackend'
+    ],
+    'PRODUCTS': [
+        'product.Product'
+    ]
 }

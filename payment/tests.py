@@ -4,13 +4,14 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
-
+from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory
 from django.test import Client
-
-from payment.models import PaymentErrorLog
 from django.core.urlresolvers import reverse, resolve
+from .models import PaymentErrorLog, Order
 
+User = get_user_model()
 
 class PNTestBase:
     available_pns = []
@@ -23,6 +24,32 @@ class PNTestBase:
         self.client = Client()
         self.factory = RequestFactory()
         PaymentErrorLog.objects.all().delete()
+
+    _user_count = 0
+    def create_user(self, username=None, **kwargs):
+        '''
+            create a user account for test
+        '''
+        self._user_count += 1
+        if username is None:
+            username = 'user_%d' % self._user_count
+        data = {
+            'password': kwargs.get('password', 'pasword' + username),
+            'username': username,
+            'email': kwargs.get('email', '%s@example.com' % username),
+            'first_name': username + 'fn',
+            'last_name': username + 'ln',
+        }
+        data.update(kwargs)
+        user = User.objects.create_user(**data)
+        return user
+
+    def create_order(self, **kwargs):
+        if 'owner' not in kwargs:
+            kwargs['owner'] = self.create_user()
+        kwargs['content_type'] = kwargs.get('content_type', ContentType.objects.get(app_label='product', model='Product'))
+        kwargs['object_id'] = kwargs.get('object_id', 1)
+        return Order.objects.create(**kwargs)
 
     def clean_invalid_inputs(self, invalid_input):
         raise NotImplemented
