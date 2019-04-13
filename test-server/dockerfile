@@ -1,6 +1,9 @@
 From python:3.6
 
-RUN pip install django==1.11.13 mysqlclient==1.3.9 requests
+RUN pip install django==1.11.13
+RUN pip install mysqlclient==1.3.9
+RUN pip install requests
+RUN pip install djangorestframework==3.6.2
 
 RUN mkdir /mnt/server
 RUN mkdir /mnt/payment

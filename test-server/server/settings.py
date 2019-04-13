@@ -141,6 +141,6 @@ PAYMENT = {
         'payment.backends.ecpay.backend.ECPayAIOBackend'
     ],
     'PRODUCTS': [
-        'product.Product'
+        'product.product.Product'
     ]
 }

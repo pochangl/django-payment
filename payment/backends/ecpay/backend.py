@@ -18,11 +18,6 @@ class ECPayAIOBackend(PaymentBackend):
     def pn_details(self, form):
         # must pass form.is_valid before reaching here
         details = super(ECPayAIOBackend, self).pn_details(form)
-
-        fee = math.floor((form.cleaned_data["PaymentTypeChargeFee"] +
-                          form.handling_fee +
-                          form.cleaned_data["TradeAmt"]*0.03)*100)/100.0
-
         details.update({
             "is_simulation": int(form.cleaned_data["SimulatePaid"]),
             "order_no": form.cleaned_data["MerchantTradeNo"],
@@ -30,7 +25,7 @@ class ECPayAIOBackend(PaymentBackend):
             "time_created": form.cleaned_data["TradeDate"],
             "payment_type": form.cleaned_data["PaymentType"],
             "payment_amount": form.cleaned_data["TradeAmt"],
-            "additional_fee": fee,
+            "additional_fee": float(form.raw_data["HandlingCharge"]),
         })
         return details
 
@@ -72,8 +67,8 @@ class ECPayAIOBackend(PaymentBackend):
                            settings.LookUpURL,
                            data=lookup_form.cleaned_data)
         params = decode_params(response.content.decode('utf-8'))
+        pn_form.raw_data = params
         status = params["TradeStatus"]
-        pn_form.handling_fee = float(params["HandlingCharge"])
         if int(params["TradeAmt"]) != pn_form.cleaned_data["TradeAmt"]:
             raise ValidationError(
                 "payment amount mismatch MerchantTradeNo: %s, %s: %s" %

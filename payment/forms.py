@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from .models import ProductBase
 from .strategies import backends
-from .backends.utils import find_products
+from .utils import find_products
 
 products = find_products()
 
@@ -13,11 +13,6 @@ class BackendField(forms.ChoiceField):
         kwargs['choices'] = tuple(backends.items())
         super().__init__(**kwargs)
 
-
-class ProductField(forms.ChoiceField):
-    def __init__(self, **kwargs):
-        kwargs['chocies'] = tuple(products.items())
-        super().__init__(**kwargs)
 
 class BuyForm(forms.Form):
     backend = BackendField()
@@ -38,11 +33,16 @@ class BuyForm(forms.Form):
         pk = data['object_id']
 
         try:
-            product = model.get(pk=pk)
+            item = model.get(pk=pk)
         except model.DoesNotExist:
             raise ValidationError('Product does not exist')
 
+        product_class = products[item]
+        product = product_class(product=product, backend=data['backend'])
+
         if not product.is_active:
             raise ValidationError('Product is not active')
+
+        data['content_object'] = item
+        data['product'] = product
         return data
-        

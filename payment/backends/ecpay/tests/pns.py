@@ -101,5 +101,6 @@ class ECPayTestBase(PNTestBase, TestCase):
         self.assertIsNone(order.payment_received)
         super().test_pn()
 
+        order = Order.objects.get()
         self.assertEqual(order.additional_fee, 1.00)
         self.assertIsNotNone(order.payment_received)

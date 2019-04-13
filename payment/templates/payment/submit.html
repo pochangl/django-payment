@@ -1,0 +1,10 @@
+{% extends "payment/blank.html" %}
+{% block content %}
+    <form enctype="multipart/form-data" action= "{{ form.submit_url }}" method = "post" style="display:none;">
+    {{ form.as_p }}
+    </form>
+{% endblock %}
+
+{% block doc_ready_javascript %}
+    document.querySelector('form').submit();
+{% endblock %}

@@ -42,7 +42,7 @@ class PaymentErrorLog(TimeStampedModel):
 
 class Order(TimeStampedModel):
     owner = models.ForeignKey('auth.User', related_name="orders")
-    
+
     order_no = models.CharField(max_length=20, blank=True, unique=True,
                                 null=True)
     backend = models.CharField(max_length=64, blank=True, null=True)
@@ -58,12 +58,9 @@ class Order(TimeStampedModel):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    def clean(self):
-        info = self.content_object.product_info
-        setattr(self, "description", info['description'])
-        setattr(self, "title", info['title'])
-        setattr(self, "order_no", info['prefix'] + self.pk)
-        
+    def create_order_no(self):
+        setattr(self, "order_no", format(self.pk, '020'))
+
 
 class ProductBase(models.Model):
     def get_absolute_url(self):

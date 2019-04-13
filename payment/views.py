@@ -37,31 +37,24 @@ class PNView(View):
 
 
 class BuyView(FormView):
+    http_method_names = ['post']
     form_class = BuyForm
-
-    def get_form_kwargs(self):
-        return self.kwargs
+    template_name = "merchant/buy_course.html"
 
     def form_valid(self, form):
-        instance = data['content_object']
-        backend = data['backend']
         data = form.cleaned_data
-        order = Order.objects.create(
-            backend=backend,
-            content_object=instance,
-        )
-        order.clean()
-        order.save()
+        backend = data['backend']
+        product = data['product']
+
+        order = product.create_order()
+
         pform = backend.get_payment_form(order=order, payment_type=data['payment_type'])
         if not pform.is_valid():
             return self.form_invalid(form)
 
-
-        return HttpResponse(json.dumps({
-            'url': pform.submit_url,
-            'method': 'post',
-            'data': pform.cleaned_data
-        }), status=200, content_type='application/json')
+        return  self.render_to_response({
+            'form': pform
+        })
 
     def form_invalid(self, form):
         return HttpResponse(status=404)

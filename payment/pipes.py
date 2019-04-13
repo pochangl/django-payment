@@ -22,15 +22,20 @@ def load_pipe(pipe_variable):
     return pipes
 
 def receive_payment(details):
+    kwargs = {
+        'details': details
+    }
     try:
         for pipe in payment_pipes:
-            details = pipe(details)
+            result = pipe(**kwargs)
+            if result:
+                kwargs.update(result)
     except DuplicatePayment:
         return
 
 
 # actual pipe
-def update_order(details):
+def update_order(details, **kwargs):
     '''
         mark order received
     '''
@@ -52,7 +57,9 @@ def update_order(details):
     order.additional_fee = details["additional_fee"]
     order.payment_received = now()
     order.save()
-    details["order"] = order
+    return {
+        'order': order
+    }
 
 payment_pipes = settings.SUCCESS_PAYMENT_PIPE if hasattr(settings, 'SUCCESS_PAYMENT_PIPE') else default_pipes
 payment_pipes = load_pipe(payment_pipes)

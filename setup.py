@@ -14,6 +14,7 @@ setuptools.setup(
         'django',
         'mysqlclient',
         'requests',
+        'djangorestframework',
     ],
     packages=[
         'payment'

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-tw" {%block html_attribute%}{% endblock %}>
+	<head>
+	{% block title%}<title>Class Figure</title>{% endblock %}
+	{%block meta%}{%endblock%}
+	{%block css%}{%endblock%}
+	{%block head%}{%endblock%}
+	{%block head_script%}{%endblock%}
+	</head>
+	{%block body_tag%}<body>{%endblock%}
+	{% block body %}
+		
+		{% block top_content %}{% endblock %}
+		{%block content %}{%endblock%}
+		{%block bottom_content%}{%endblock%}
+		{%block source_script%} {%endblock%}
+		<script>
+		  {%block javascript%}{%endblock%}
+			$(document).ready( function(){
+				{%block doc_ready_javascript%}{%endblock%}
+			});
+		</script>
+	{% endblock %}
+	</body>
+</html>
