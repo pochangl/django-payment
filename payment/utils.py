@@ -14,6 +14,9 @@ def find_products():
     products = {}
     for path in settings['PRODUCTS']:
         product = get_class(path)
-        products[product.model] = product
-        assert isinstance(product, Product)
+        assert product.name not in products
+        products[product.name] = product
+        assert issubclass(product, Product), '%s is not Product' % path
     return products
+
+products = find_products()

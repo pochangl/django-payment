@@ -11,7 +11,7 @@ settings = global_settings.PAYMENT
 
 def find_backends():
     backends = {}
-    for backend in settings['PAYMENT_BACKENDS']:
+    for backend in settings['BACKENDS']:
         backend_class = get_class(backend)
         if issubclass(backend_class, PaymentBackend):
             backend_name = backend_class.backend_name
@@ -22,7 +22,7 @@ def find_backends():
 def backend_choices():
     # this util is for generating form chocies
     backend_choices = ()
-    for backend in settings['PAYMENT_BACKENDS']:
+    for backend in settings['BACKENDS']:
         backend_class = get_class(backend)
         if issubclass(backend_class, PaymentBackend):
             backend_name = backend_class.backend_name

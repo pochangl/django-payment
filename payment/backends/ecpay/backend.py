@@ -30,7 +30,6 @@ class ECPayAIOBackend(PaymentBackend):
         return details
 
     def get_payment_form(self, **kwargs):
-        kwargs['payment_type'] = 'ALL'
         form = super(ECPayAIOBackend, self).get_payment_form(**kwargs)
         if form.is_valid():
             return form
@@ -41,12 +40,12 @@ class ECPayAIOBackend(PaymentBackend):
                  inspect.currentframe().f_back.f_lineno,
                  form.errors))
 
-    def get_ALL_payment_form(self, order, form_class=ECPayPayForm):
-        form = form_class(data={
+    def get_ALL_payment_form(self, order):
+        form = ECPayPayForm(data={
             "MerchantTradeNo": order.order_no,
             "MerchantTradeDate": format_time(order.time_created),
             "PaymentType": "aio",
-            "ChoosePayment": "ALL",
+            "ChoosePayment": order.PaymentMethod,
             "TotalAmount": order.payment_amount,
             "TradeDesc": order.description[0:200],
             "ItemName": order.title[0:200],

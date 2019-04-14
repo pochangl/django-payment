@@ -68,18 +68,22 @@ class ECPayTestBase(PNTestBase, TestCase):
     pn_form = forms.ECPayAIOPNForm
 
     def create_order(self, **kwargs):
-        super().create_order(
+        return super().create_order(
             backend=self.backend_name,
+            product_class='product_one',
             **kwargs
         )
 
     def setUp(self):
         super().setUp()
         for pns in self.available_pns:
-            self.create_order(
+            order = self.create_order(
                 order_no=pns['MerchantTradeNo'],
                 payment_amount=pns['TradeAmt'],
             )
+            model_class = order.content_type.model_class()
+            pk = order.object_id
+            model_class.objects.create(pk=pk, name=pk, description=pk, price=pk)
 
     def clean_invalid_inputs(self, invalid_input):
         invalid_input["CheckMacValue"] = get_CheckMacValue(invalid_input)

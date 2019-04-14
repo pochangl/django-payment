@@ -77,17 +77,9 @@ class PaymentBackend(object):
                  inspect.currentframe().f_back.f_lineno,
                  str(form.errors)))
 
-    def get_payment_form(self, order_no, title, payment_amount, description,
-                         time_created, user_return_url, payment_type):
-        func = getattr(self, "get_%s_payment_form" % payment_type)
-        return func(
-            order_no=order_no,
-            title=title,
-            payment_amount=payment_amount,
-            description=description,
-            time_created=time_created,
-            user_return_url=user_return_url,
-        )
+    def get_payment_form(self, order):
+        func = getattr(self, "get_%s_payment_form" % order.payment_method)
+        return func(order=order)
 
     def invalid_response(self, error_message):
         raise NotImplemented

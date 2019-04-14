@@ -7,12 +7,15 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import classonlymethod
-from django.views.generic import View, FormView
+from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.generics import CreateAPIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import PaymentErrorLog
 from .strategies import OffsiteStrategy
 from .pipes import receive_payment
-from .forms import BuyForm
+from .serializers import BuySerializer
 
 class PNView(View):
     class Meta:
@@ -36,25 +39,21 @@ class PNView(View):
         log.save()
 
 
-class BuyView(FormView):
-    http_method_names = ['post']
-    form_class = BuyForm
-    template_name = "merchant/buy_course.html"
+class BuyView(CreateAPIView):
+    serializer_class = BuySerializer
 
-    def form_valid(self, form):
-        data = form.cleaned_data
-        backend = data['backend']
-        product = data['product']
-
-        order = product.create_order()
-
-        pform = backend.get_payment_form(order=order, payment_type=data['payment_type'])
-        if not pform.is_valid():
-            return self.form_invalid(form)
-
-        return  self.render_to_response({
-            'form': pform
-        })
-
-    def form_invalid(self, form):
-        return HttpResponse(status=404)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order = serializer.create()
+        data = serializer.data
+        pform = data['backend'].get_payment_form(order=order)
+        if pform.is_valid():
+            headers = self.get_success_headers(serializer.data)
+            return Response({
+                'data': pform.cleaned_data,
+                'url': data['product_type'].get_product_url(order=order),
+                'method': 'POST',
+            }, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(data=pform.errors, status=status.HTTP_400_BAD_REQUEST, headers=headers)

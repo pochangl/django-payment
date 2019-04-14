@@ -127,7 +127,7 @@ STATIC_URL = '/static/'
 
 
 #
-PAYMENT = {
+PAYMENT_SETTINGS = {
     'BACKENDS': {
         'ECPAY': {
             'MERCHANT_ID': '2000132',
@@ -136,11 +136,14 @@ PAYMENT = {
             'PAYMENT_EXPIRE_DAYS': 7,
             'TEST': True
         }
-    },
-    'PAYMENT_BACKENDS': [
+    }
+}
+
+PAYMENT = {
+    'BACKENDS': [
         'payment.backends.ecpay.backend.ECPayAIOBackend'
     ],
     'PRODUCTS': [
-        'product.product.Product'
+        'product.products.ProductOne'
     ]
 }

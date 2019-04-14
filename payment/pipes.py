@@ -5,11 +5,14 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from .models import Order
 from .exceptions import DuplicatePayment
+from .utils import products
+from .strategies import backends
 
 
 # pip loading
 default_pipes = [
-    'payment.pipes.update_order'
+    'payment.pipes.update_order',
+    'payment.pipes.apply_order',
 ]
 
 def load_pipe(pipe_variable):
@@ -47,8 +50,8 @@ def update_order(details, **kwargs):
 
     # duplicate entry
     if order.payment_received:
-        raise DuplicatePayment("duplicate payment: pay "
-                               "has already been proceed")
+        raise DuplicatePayment("duplicate payment: payment "
+                               "has already been processed")
     if order.payment_amount != details["payment_amount"]:
         raise ValidationError(
             "Payment amount does not meet our record, %s: %s" %
@@ -60,6 +63,16 @@ def update_order(details, **kwargs):
     return {
         'order': order
     }
+
+def apply_order(order, **kwargs):
+    if order.handled:
+        return
+    Product = products[order.product_class]
+    backend = backends[order.backend]
+    product = Product(item=order.content_object, backend=backend)
+    product.apply(order.owner)
+    order.handled = True
+    order.save()
 
 payment_pipes = settings.SUCCESS_PAYMENT_PIPE if hasattr(settings, 'SUCCESS_PAYMENT_PIPE') else default_pipes
 payment_pipes = load_pipe(payment_pipes)

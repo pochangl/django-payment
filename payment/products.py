@@ -9,26 +9,38 @@ class Product:
     backend = None
     serializer_class = None
 
-    def __init__(self, product, backend):
+    def __init__(self, item, backend):
         self.backend = backend
-        self.product = product
-        assert isinstance(self.serializer_class, ProductSerializer)
+        self.item = item
+        assert issubclass(self.serializer_class, ProductSerializer)
 
-    def create_order(self):
-        data = self.serializer_class(instance=self.product)
+    @property
+    def data(self):
+        return self.serializer_class(instance=self.item).data
+
+    @property
+    def price(self):
+        return data['price']
+
+    def create_order(self, payment_method, **kwargs):
+        data = self.data
+        data.update(kwargs)
 
         order = Order.objects.create(
             backend=self.backend.backend_name,
+            content_object=self.item,
+            payment_method=payment_method,
             **data
         )
         order.create_order_no()
         order.save()
         return order
 
-    def get_product_url(self, order):
-        product = order.content_object
-        assert product == self.product
-        return product.get_absolute_url()
+    @classmethod
+    def get_product_url(cls, order):
+        item = order.content_object
+        assert isinstance(item, cls.Meta.model)
+        return item.get_absolute_url()
 
     def is_active(self):
-        return self.product.is_active
+        return self.item.is_active

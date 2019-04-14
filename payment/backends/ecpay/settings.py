@@ -5,7 +5,7 @@
 from django.conf import settings as global_settings
 import sys
 
-production_settings = global_settings.PAYMENT['BACKENDS']['ECPAY']
+production_settings = global_settings.PAYMENT_SETTINGS['BACKENDS']['ECPAY']
 
 class ECPaySettings():
     MerchantID = production_settings['MERCHANT_ID']

@@ -47,11 +47,15 @@ class Order(TimeStampedModel):
                                 null=True)
     backend = models.CharField(max_length=64, blank=True, null=True)
 
+    payment_method = models.CharField(max_length=64)
     payment_amount = models.PositiveIntegerField()
     additional_fee = models.PositiveIntegerField(default=0)
     title = models.CharField(max_length=200, blank=True)
     description = models.CharField(max_length=200, blank=True)
     payment_received = models.DateTimeField(blank=True, null=True)
+    product_class = models.CharField(max_length=64)
+
+    handled = models.BooleanField(default=False)
 
     # content
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
