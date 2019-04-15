@@ -17,6 +17,7 @@ from .strategies import OffsiteStrategy
 from .pipes import receive_payment
 from .serializers import BuySerializer
 
+
 class PNView(View):
     class Meta:
         http_methods = ['post']
@@ -43,11 +44,12 @@ class BuyView(CreateAPIView):
     serializer_class = BuySerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
         data = serializer._validated_data
-        pform = data['backend'](request=self.request).get_payment_form(order=order)
+        product = data['product']
+        pform = data['backend'](request=self.request).get_payment_form(order=order, product=product)
         if pform.is_valid():
             headers = self.get_success_headers(serializer.data)
             return Response({

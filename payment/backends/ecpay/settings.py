@@ -11,14 +11,15 @@ class ECPaySettings():
     MerchantID = production_settings['MERCHANT_ID']
     HashKey = production_settings['HASH_KEY']
     HashIV = production_settings['HASH_IV']
-    ExpireDays = production_settings['PAYMENT_EXPIRE_DAYS']
+    ExpireDate = production_settings.get('EXPIRE_DATE', 3)
     TEST = False
     AioCheckOut_URL = "https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5"
     LookUpURL = "https://payment.ecpay.com.tw/Cashier/QueryTradeInfo/V5"
 
-    DateTimeFormats = ['%Y/%m/%d %H:%M:%S']
+    DateTimeFormat = '%Y/%m/%d %H:%M:%S'
     PaymentType = "aio"
     PaymentChoices = (
+        ("ALL", "全部"),
         ("Credit", "信用卡"),
         # ("WebATM","網路 ATM"),
         ("ATM", "自動櫃員機"),
@@ -28,9 +29,7 @@ class ECPaySettings():
         # ("Tenpay","財付通"),
         # ("TopUpUsed","儲值消費"),
     )
-    ResponsePaymentTypePrefixes = (r"^Credit",
-                                   r"^ATM",
-                                   r"^CVS",)
+
     TradeStatusCode = {
         "1": "Succeeded 成功",
         "2": "Create Trade Successed. 建立訂單成功",

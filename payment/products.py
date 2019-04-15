@@ -1,5 +1,6 @@
 import six
 from django.utils.functional import cached_property
+from django.urls import reverse
 from rest_framework import serializers
 from .models import Order
 
@@ -22,8 +23,10 @@ class Product:
     product = None
     backend = None
     serializer_class = None
+    return_view_name = None
+    view_name = None
 
-    def __init__(self, item, backend):
+    def __init__(self, request, item, backend):
         self.backend = backend
         self.item = item
         assert issubclass(self.serializer_class, ProductSerializer)
@@ -35,6 +38,16 @@ class Product:
     @property
     def price(self):
         return self.data['payment_amount']
+
+    @property
+    def url(self):
+        # product info url
+        return self.request.build_absolute_uri(reverse(self.view_name, kwargs={'pk': self.item.pk}))
+
+    @property
+    def return_url(self):
+        # where user should return after done with purchasing
+        return self.request.build_absolute_uri(reverse(self.return_view_name, kwargs={'pk': self.item.pk}))
 
     def create_order(self, owner, payment_method, **kwargs):
         data = self.data
@@ -50,11 +63,5 @@ class Product:
         order.save()
         return order
 
-    @classmethod
-    def get_product_url(cls, order):
-        item = order.content_object
-        assert isinstance(item, cls.Meta.model)
-        return item.get_absolute_url()
-
     def is_active(self):
-        return self.item.is_active
+        return self.price > 0

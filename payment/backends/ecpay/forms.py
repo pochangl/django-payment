@@ -7,19 +7,19 @@ import re
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 from .models import ECPayReceive
 from .settings import settings
-from .utils import get_CheckMacValue
+from .utils import get_CheckMacValue, format_time
 
 
-class CMVGenMixin(object):
+class CMVGenMixin:
     class Meta:
         abstract = True
 
     def clean(self):
         cleaned_data = super(CMVGenMixin, self).clean()
-        cleaned_data["CheckMacValue"] = self.data["CheckMacValue"] = \
-            get_CheckMacValue(cleaned_data)
+        cleaned_data["CheckMacValue"] = self.data["CheckMacValue"] = get_CheckMacValue(cleaned_data)
         return cleaned_data
 
 
@@ -34,17 +34,10 @@ class CMVCheckMixin(object):
 
 
 class ECPayAIOPNForm(CMVCheckMixin, forms.ModelForm):
-    # form for receive all pay payment notiifcation
+    # form for receive ec pay payment notiifcation
 
-    PaymentDate = forms.DateTimeField(input_formats=settings.DateTimeFormats,)
-    TradeDate = forms.DateTimeField(input_formats=settings.DateTimeFormats,)
-
-    def clean_PaymentType(self):
-        data = self.cleaned_data["PaymentType"]
-        if any([re.search(prefix, data) for prefix in settings.ResponsePaymentTypePrefixes]):
-            return data
-        else:
-            raise ValidationError("Wrong Choice")
+    PaymentDate = forms.DateTimeField(input_formats=[settings.DateTimeFormat])
+    TradeDate = forms.DateTimeField(input_formats=[settings.DateTimeFormat])
 
     def clean_RtnCode(self):
         if self.cleaned_data["RtnCode"] != 1:
@@ -60,17 +53,15 @@ class ECPayAIOPNForm(CMVCheckMixin, forms.ModelForm):
 
     class Meta:
         model = ECPayReceive
-        datetime_format = settings.DateTimeFormats
         fields = '__all__'
 
 
 class ECPayPayForm(CMVGenMixin, forms.Form):
-    CheckMacValue = forms.CharField(required=False)
     submit_url = settings.AioCheckOut_URL
     MerchantID = forms.CharField(initial=settings.MerchantID, max_length=10,
                                  required=False)
     MerchantTradeNo = forms.CharField(max_length=20)
-    MerchantTradeDate = forms.CharField(max_length=20, required=False)
+    MerchantTradeDate = forms.CharField(max_length=20)
     PaymentType = forms.CharField(initial=settings.PaymentType)
     TotalAmount = forms.IntegerField()
     TradeDesc = forms.CharField(max_length=200)
@@ -78,22 +69,17 @@ class ECPayPayForm(CMVGenMixin, forms.Form):
     ReturnURL = forms.URLField()
     ChoosePayment = forms.ChoiceField(choices=settings.PaymentChoices)
     ClientBackURL = forms.URLField(max_length=200)
-    # ItemURL = forms.URLField(max_length=200)
-    # ChooseSubPayment = forms.CharField(max_length=20, initial="")
+    EncryptType = forms.IntegerField()
+    ExpireDate = forms.IntegerField()
+    ItemURL = forms.URLField(max_length=200)
 
-    def clean_MerchantTradeDate(self):
-        if self.cleaned_data["MerchantTradeDate"] is None:
-            date = self.data["MerchantTradeDate"] = \
-                datetime.datetime.utcnow()\
-                .strftime(settings.DateTimeFormats[0])
-            return date
-        else:
-            return self.cleaned_data["MerchantTradeDate"]
+    def clean_EncryptType(self):
+        return 1
 
     def __init__(self, data, *args, **kwargs):
-        if "MerchantTradeDate" in data:
-            data["MerchantTradeDate"] = \
-                data["MerchantTradeDate"].strftime(settings.DateTimeFormats[0])
+        data["MerchantTradeDate"] = format_time(data["MerchantTradeDate"])
+        data['ExpireDate'] = settings.ExpireDate
+        data['EncryptType'] = '1'
         data["MerchantID"] = settings.MerchantID
         super().__init__(data=data, *args, **kwargs)
 
@@ -109,5 +95,4 @@ class ECPayAIOLookUpForm(CMVGenMixin, forms.Form):
     def __init__(self, *args, **kwargs):
         super(ECPayAIOLookUpForm, self).__init__(*args, **kwargs)
         self.data["MerchantID"] = settings.MerchantID
-        self.data["TimeStamp"] = \
-            calendar.timegm(datetime.datetime.now().utctimetuple())
+        self.data["TimeStamp"] = calendar.timegm(datetime.datetime.now().utctimetuple())

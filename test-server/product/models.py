@@ -7,3 +7,5 @@ class ProductModel(models.Model):
     price = models.PositiveIntegerField()
 
     buyers = models.ManyToManyField('auth.User')
+
+    is_active = models.BooleanField(default=False)

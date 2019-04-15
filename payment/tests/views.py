@@ -1,8 +1,11 @@
 from django.test import TestCase
+from django.utils.timezone import now
 from rest_framework import status
 from product.models import ProductModel
-from ..models import Order
+from payment.backends.ecpay.settings import settings
 from .mixins import APIMixin
+from ..models import Order
+from ..utils import format_time
 
 
 class BuyViewTest(APIMixin, TestCase):
@@ -28,6 +31,7 @@ class BuyViewTest(APIMixin, TestCase):
             'price': item.price,
             'payment_method': 'ALL'
         }
+
     def test_buy(self):
         self.assertEqual(Order.objects.count(), 0)
         item = self.item
@@ -38,6 +42,7 @@ class BuyViewTest(APIMixin, TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+        # check order object
         order = Order.objects.get()
 
         # Truthy
@@ -69,3 +74,24 @@ class BuyViewTest(APIMixin, TestCase):
             self.assertEqual(getattr(order, oattr), getattr(item, iattr))
 
         self.assertEqual(order.content_object, item)
+
+        # check return value
+        content = self.load_json(response.content)
+
+        self.assertEqual(content, {
+            'method': 'POST',
+            'url': settings.AioCheckOut_URL,
+            'data': {
+                'ChoosePayment': 'ALL',
+                'MerchantID': settings.MerchantID,
+                'PaymentType': 'aio',
+                'ExpireDate': 7,
+                'MerchantTradeNo': order.order_no,
+                'ItemName': item.title,
+                'TradeDesc': item.description,
+                'TotalAmount': item.price,
+                'ClientBackURL': 'https://example.com',
+                'MerchantTradeDate': format_time(order.time_created),
+                'ReturnURL': 'https://www.ecpay.com.tw/receive.php',
+            }
+        })

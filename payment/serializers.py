@@ -22,7 +22,7 @@ class BuySerializer(serializers.Serializer):
             raise ValidationError('Product does not exist')
 
         product_class = data['product_type']
-        product = product_class(item=item, backend=data['backend'])
+        product = product_class(request=self._context['request'], item=item, backend=data['backend'])
 
         if not product.is_active:
             raise ValidationError('Product is not active')

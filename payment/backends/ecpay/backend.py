@@ -7,7 +7,7 @@ from requests import request
 from ..base import PaymentBackend, InvalidInput, InvalidPayment
 from .settings import settings
 from .forms import ECPayAIOPNForm, ECPayAIOLookUpForm, ECPayPayForm
-from .utils import decode_params
+from .utils import decode_params, format_time
 
 
 class ECPayAIOBackend(PaymentBackend):
@@ -40,7 +40,7 @@ class ECPayAIOBackend(PaymentBackend):
                  inspect.currentframe().f_back.f_lineno,
                  form.errors))
 
-    def get_ALL_payment_form(self, order):
+    def get_ALL_payment_form(self, order, product):
         form = ECPayPayForm(data={
             "MerchantTradeNo": order.order_no,
             "MerchantTradeDate": format_time(order.time_created),
@@ -51,20 +51,24 @@ class ECPayAIOBackend(PaymentBackend):
             "ItemName": order.title[0:200],
             "ReturnURL": self.pn_url(),
             "ChoosePayment": "Credit",
-            "ClientBackURL": order.content_object.return_url,
-            })
+            "ClientBackURL": product.return_url,
+            "ItemUrl": product.url,
+        })
         return form
 
     def transaction_is_valid(self, pn_form):
         pn_form.is_valid()
         self.input_is_valid(pn_form)
         lookup_form = ECPayAIOLookUpForm(
-            data={"MerchantTradeNo": pn_form.cleaned_data["MerchantTradeNo"]})
+            data={"MerchantTradeNo": pn_form.cleaned_data["MerchantTradeNo"]}
+        )
 
         self.input_is_valid(lookup_form)
-        response = request("POST",
-                           settings.LookUpURL,
-                           data=lookup_form.cleaned_data)
+        response = request(
+            "POST",
+            settings.LookUpURL,
+            data=lookup_form.cleaned_data
+        )
         params = decode_params(response.content.decode('utf-8'))
         pn_form.raw_data = params
         status = params["TradeStatus"]

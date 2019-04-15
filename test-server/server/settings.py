@@ -135,7 +135,7 @@ PAYMENT_SETTINGS = {
             'MERCHANT_ID': '2000132',
             'HASH_KEY': '5294y06JbISpM5x9',
             'HASH_IV': 'v77hoKGq4kWxNNIS',
-            'PAYMENT_EXPIRE_DAYS': 7,
+            'EXPIRE_DATE': 7,
             'TEST': True
         }
     }

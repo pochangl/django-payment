@@ -5,9 +5,16 @@ Created on Jan 12, 2014
 '''
 import datetime
 import hashlib
-import urllib
+import pytz
 import string
+import urllib
 from .settings import settings
+
+timezone = pytz.timezone('Asia/Taipei')
+
+def format_time(dt):
+    dt = timezone.normalize(dt)
+    return dt.strftime(settings.DateTimeFormat)
 
 
 def generate_CheckMacValue(dictionary, key, iv):
@@ -20,7 +27,7 @@ def generate_CheckMacValue(dictionary, key, iv):
     urlencoded_string = ""
     for a, b in sorted_fields:
         if type(b) == datetime.datetime:
-            b = b.strftime(settings.DateTimeFormats[0])
+            b = format_time(b)
         if urlencoded_string != "":
             urlencoded_string = "%s&%s=%s" % (urlencoded_string, a, b)
         else:

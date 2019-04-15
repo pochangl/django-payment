@@ -14,7 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.views import View
 
 urlpatterns = [
     url(r'^pn/', include('payment.urls')),
+    url(r'^return/(?P<pk>\d+)$', View.as_view(), name="return_page"),
+    url(r'^info/(?P<pk>\d+)$', View.as_view(), name="product_info"),
 ]
