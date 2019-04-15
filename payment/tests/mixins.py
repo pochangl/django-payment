@@ -1,6 +1,20 @@
+import copy
+from django.contrib.auth import get_user_model
+from django.db.models import Model
+from django.urls import reverse
+from rest_framework.test import APIClient
+from rest_framework.authtoken.models import Token
 
-class ClientMixin:
+User = get_user_model()
 
+class AccountMixin:
+    def get_password(self, username):
+        '''
+            rebuild password from username
+        '''
+        return '%s_psw' % username
+
+    _user_count = 0
     def create_user(self, username=None, **old_kwargs):
         '''
             create a user account for test
@@ -17,7 +31,30 @@ class ClientMixin:
             'last_name': username + 'ln',
         })
         user = User.objects.create_user(**kwargs)
+        Token.objects.create(user=user)
         return user
+
+
+class ClientMixin(AccountMixin):
+    def reverse(self, *args, **kwargs):
+        return reverse(*args, **kwargs)
+
+    def clean_data(self, d):
+        if isinstance(d, list):
+            data = []
+            for value in d:
+                if isinstance(value, Model):
+                    data.append(value.pk)
+                else:
+                    data.append(value)
+        elif isinstance(d, dict):
+            data = {}
+            for key, value in d.items():
+                if isinstance(value, Model):
+                    data[key] = value.id
+                else:
+                    data[key] = value
+        return data
 
     def get_logged_in_client(self, user=None):
         '''
@@ -30,6 +67,22 @@ class ClientMixin:
         client.user = user
         client.credentials(HTTP_AUTHORIZATION='Token ' + user.auth_token.key)
         return client
+
+
+class APIMixin(ClientMixin):
+    client_class = APIClient
+    is_viewset = False
+
+    def get_url(self, **kwargs):
+        if self.is_viewset:
+            if 'pk' in kwargs:
+                return self.reverse(self.view_name + '-detail', kwargs=kwargs)
+            if 'pks' in kwargs:
+                return self.reverse(self.view_name + '-set', kwargs=kwargs)
+            else:
+                return self.reverse(self.view_name + '-list', kwargs=kwargs)
+        else:
+            return self.reverse(self.view_name, kwargs=kwargs)
 
     def api_create(self, user, data):
         data = self.clean_data(data)

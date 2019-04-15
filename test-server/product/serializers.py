@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from payment.serializers import ProductSerializer
+from payment.products import ProductSerializer
 from .models import ProductModel
 
 

@@ -9,14 +9,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory
 from django.test import Client
 from django.core.urlresolvers import reverse, resolve
-from .models import PaymentErrorLog, Order
+from ..models import PaymentErrorLog, Order
 
 User = get_user_model()
 
 class PNTestBase:
     available_pns = []
     invalid_fields = []
-    urlname = "pn_view"
+    urlname = "pn"
     backend_name = None
     pn_form = None
 
@@ -64,12 +64,12 @@ class PNTestBase:
         raise NotImplemented
 
     def send_invalid_pns(self, view, inputs, *args, **kwargs):
-        resolve_match = resolve(reverse('pn_view',
+        resolve_match = resolve(reverse('pn',
                                         kwargs={"backend": self.backend_name}))
         for i in range(0, len(inputs)):
             pn_input = self.clean_invalid_inputs(inputs[i])
             request = self.factory.post(
-                reverse('pn_view', kwargs=resolve_match.kwargs), data=pn_input)
+                reverse('pn', kwargs=resolve_match.kwargs), data=pn_input)
             response = view(request,
                             *resolve_match.args,
                             **resolve_match.kwargs)
@@ -77,12 +77,12 @@ class PNTestBase:
 
     def send_valid_pns(self, view, inputs, *args, **kwargs):
         resolve_match = \
-            resolve(reverse('pn_view', kwargs={"backend": self.backend_name}))
+            resolve(reverse('pn', kwargs={"backend": self.backend_name}))
         for i in range(0, len(inputs)):
             pn_input = self.clean_valid_inputs(inputs[i])
             form = self.pn_form(pn_input)
             self.assertTrue(form.is_valid(), form.errors)
-            request = self.factory.post(reverse('pn_view',
+            request = self.factory.post(reverse('pn',
                                                 kwargs=resolve_match.kwargs),
                                         data=pn_input)
             response = view(request,
@@ -91,7 +91,7 @@ class PNTestBase:
             self.assert_valid_response(response)
 
     def test_pn(self):
-        resolve_match = resolve(reverse('pn_view',
+        resolve_match = resolve(reverse('pn',
                                         kwargs={"backend": self.backend_name}))
         pn_view = resolve_match.func
 
@@ -104,7 +104,7 @@ class PNTestBase:
             input = pn_input.copy()
             input[field_name] = value
             input = self.clean_invalid_inputs(input)
-            request = self.factory.post(reverse('pn_view',
+            request = self.factory.post(reverse('pn',
                                                 kwargs=resolve_match.kwargs),
                                         data=input)
             response = pn_view(request,

@@ -3,13 +3,12 @@ Created on Jan 7, 2014
 
 @author: pochangl
 '''
-from .backends.base import NoBackEndFound
-from .backends.utils import find_backends
-from django.conf import settings
 import traceback
 import sys
+from django.conf import settings
+from .backends.base import NoBackEndFound
+from .settings import backends
 
-backends = find_backends()
 
 class OffsiteStrategy(object):
     '''

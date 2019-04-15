@@ -1,6 +1,20 @@
 import six
+from django.utils.functional import cached_property
+from rest_framework import serializers
 from .models import Order
-from .serializers import ProductSerializer
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    @property
+    def data(self):
+        # transform to corresponded field
+        data = super().data
+        return {
+            'title': data['name'],
+            'payment_amount': data['price'],
+            'description': data['description'],
+            'content_object': self.instance
+        }
 
 
 class Product:
@@ -14,21 +28,21 @@ class Product:
         self.item = item
         assert issubclass(self.serializer_class, ProductSerializer)
 
-    @property
+    @cached_property
     def data(self):
         return self.serializer_class(instance=self.item).data
 
     @property
     def price(self):
-        return data['price']
+        return self.data['payment_amount']
 
-    def create_order(self, payment_method, **kwargs):
+    def create_order(self, owner, payment_method, **kwargs):
         data = self.data
         data.update(kwargs)
 
         order = Order.objects.create(
+            owner=owner,
             backend=self.backend.backend_name,
-            content_object=self.item,
             payment_method=payment_method,
             **data
         )

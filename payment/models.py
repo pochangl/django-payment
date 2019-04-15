@@ -64,11 +64,3 @@ class Order(TimeStampedModel):
 
     def create_order_no(self):
         setattr(self, "order_no", format(self.pk, '020'))
-
-
-class ProductBase(models.Model):
-    def get_absolute_url(self):
-        return reverse(self.view_name, kwargs={'id': self.pk})
-
-    class Meta:
-        abstract = True

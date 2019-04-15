@@ -45,9 +45,9 @@ class BuyView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        order = serializer.create()
-        data = serializer.data
-        pform = data['backend'].get_payment_form(order=order)
+        order = serializer.save()
+        data = serializer._validated_data
+        pform = data['backend'](request=self.request).get_payment_form(order=order)
         if pform.is_valid():
             headers = self.get_success_headers(serializer.data)
             return Response({

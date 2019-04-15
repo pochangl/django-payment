@@ -52,11 +52,11 @@ class PaymentBackend(object):
 
     def client_return_url(self):
         return self.request.build_absolute_uri(
-            reverse('pn_view', kwargs={"backend": self.backend_name}))
+            reverse('pn', kwargs={"backend": self.backend_name}))
 
     def pn_url(self):
         return self.request.build_absolute_uri(
-            reverse('pn_view', kwargs={"backend": self.backend_name}))
+            reverse('pn', kwargs={"backend": self.backend_name}))
 
     def pn_details(self, form):
         return {

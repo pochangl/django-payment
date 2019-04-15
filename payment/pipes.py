@@ -5,8 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from .models import Order
 from .exceptions import DuplicatePayment
-from .utils import products
-from .strategies import backends
+from .settings import backends, products
 
 
 # pip loading
