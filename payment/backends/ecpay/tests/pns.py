@@ -14,7 +14,8 @@ from payment.backends.ecpay.settings import settings
 from payment.backends.ecpay.utils import get_CheckMacValue
 from payment.backends.ecpay import forms
 from payment.models import Order
-
+from product.models import ProductModel
+from django.core.urlresolvers import resolve, reverse
 
 available_ecpay_pns = [
     {
@@ -106,3 +107,27 @@ class ECPayTestBase(PNTestBase, TestCase):
         order = Order.objects.get()
         self.assertEqual(order.additional_fee, 1.00)
         self.assertIsNotNone(order.payment_received)
+
+    def test_product_apply(self):
+        resolve_match = resolve(reverse('pn', kwargs={"backend": self.backend_name}))
+        pn_view = resolve_match.func
+        order = Order.objects.get()
+        product = ProductModel.objects.get()
+
+        self.assertEqual(product.buyers.count(), 0)
+        self.send_valid_pns(pn_view, self.available_pns)
+        self.assertEqual(product.buyers.get(), order.owner)
+
+    def test_pipe_apply(self):
+        resolve_match = resolve(reverse('pn', kwargs={"backend": self.backend_name}))
+        pn_view = resolve_match.func
+        order = Order.objects.get()
+        field_names = ['payment_received', 'additional_fee', 'handled']
+        # Falsy
+        for field_name in field_names:
+            self.assertFalse(getattr(order, field_name))
+        self.send_valid_pns(pn_view, self.available_pns)
+
+        order = Order.objects.get()
+        for field_name in field_names:
+            self.assertTrue(getattr(order, field_name))

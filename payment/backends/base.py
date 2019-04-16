@@ -50,10 +50,6 @@ class PaymentBackend(object):
             raise InvalidForm("pn_form undefined")
         return self.pn_form_class(request.POST, request.FILES)
 
-    def client_return_url(self):
-        return self.request.build_absolute_uri(
-            reverse('pn', kwargs={"backend": self.backend_name}))
-
     def pn_url(self):
         return self.request.build_absolute_uri(
             reverse('pn', kwargs={"backend": self.backend_name}))

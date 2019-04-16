@@ -15,6 +15,5 @@ class ProductOne(Product):
     def apply(self, user):
         self.item.buyers.add(user)
 
-    @property
     def is_active(self):
         return super().is_active() and self.item.is_active

@@ -24,10 +24,10 @@ class BuySerializer(serializers.Serializer):
         product_class = data['product_type']
         product = product_class(request=self._context['request'], item=item, backend=data['backend'])
 
-        if not product.is_active:
+        if not product.is_active():
             raise ValidationError('Product is not active')
         elif data['price'] != product.price:
-            raise ValidationError('Price does not match')
+            raise ValidationError('Price mismatch')
 
         data['content_object'] = item
         data['product'] = product

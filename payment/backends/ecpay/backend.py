@@ -51,7 +51,7 @@ class ECPayAIOBackend(PaymentBackend):
             "ItemName": order.title[0:200],
             "ReturnURL": self.pn_url(),
             "ChoosePayment": 'ALL',
-            "ClientBackURL": product.return_url,
+            "ClientBackURL": product.get_return_url(order),
             "ItemURL": product.url,
         })
         return form

@@ -97,17 +97,63 @@ class BuyViewTest(APIMixin, TestCase):
                 'TradeDesc': item.description,
                 'TotalAmount': item.price,
                 'MerchantTradeDate': format_time(order.time_created),
-                'ClientBackURL': 'http://example.com/return/%d' % item.pk,
+                'ClientBackURL': 'http://example.com/return/%d' % order.pk,
                 'ItemURL': 'http://example.com/info/%d' % item.pk,
                 'ReturnURL': 'http://example.com/pn/pn/ecpay_aio',
                 'EncryptType': 1,
             }
         })
 
-        def test_price_zero(self):
-            # should be rejected
-            raise NotImplementedError()
+    def test_price_zero(self):
+        item = self.item
+        price = item.price
+        item.price = 0
+        item.save()
+        data = self.data.copy()
+        data['price'] = 0
+        user = self.create_user()
 
-        def test_inactive(self):
-            # should be rejected
-            raise NotImplementedError()
+        # should reject
+        response = self.api_create(user=user, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.content)
+        self.assertTrue(b'Product is not active' in response.content)
+
+        data['price'] = item.price = price
+        item.save()
+
+
+        # should accept
+        response = self.api_create(user=user, data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+
+    def test_inactive(self):
+        item = self.item
+        item.is_active = False
+        item.save()
+        data = self.data
+
+        user = self.create_user()
+
+        # should reject
+        response = self.api_create(user=user, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.content)
+        self.assertTrue(b'Product is not active' in response.content)
+
+        item.is_active = True
+        item.save()
+
+        # should accept
+        response = self.api_create(user=user, data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+
+    def test_price_mismatch(self):
+        user = self.create_user()
+        data = self.data
+        item = self.item
+        item.price += 1
+        item.save()
+
+        # should reject
+        response = self.api_create(user=user, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.content)
+        self.assertTrue(b'Price mismatch' in response.content, response.content)
