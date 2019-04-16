@@ -20,15 +20,16 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class Product:
     product_type = None
-    product = None
+    item = None
     backend = None
     serializer_class = None
     return_view_name = None
     view_name = None
 
-    def __init__(self, request, item, backend):
+    def __init__(self, item, backend, request=None):
         self.backend = backend
         self.item = item
+        self.request = request
         assert issubclass(self.serializer_class, ProductSerializer)
 
     @cached_property
@@ -57,6 +58,7 @@ class Product:
             owner=owner,
             backend=self.backend.backend_name,
             payment_method=payment_method,
+            product_class=self.name,
             **data
         )
         order.create_order_no()

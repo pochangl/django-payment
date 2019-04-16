@@ -3,24 +3,29 @@ from django.utils.timezone import now
 from rest_framework import status
 from product.models import ProductModel
 from payment.backends.ecpay.settings import settings
+from payment.backends.ecpay.utils import format_time
 from .mixins import APIMixin
 from ..models import Order
-from ..utils import format_time
 
 
 class BuyViewTest(APIMixin, TestCase):
     view_name = 'buy'
 
     _item_count = 0
-    def create_item(self):
+    maxDiff = 2000
+
+    def create_item(self, **kwargs):
         self._item_count += 1
         cnt = self._item_count
+        data = {
+            'price': cnt * 100,
+            'name': 'product %d' % cnt,
+            'description': 'product desc %d' % cnt,
+            'is_active': True
+        }
+        data.update(kwargs)
 
-        return ProductModel.objects.create(
-            price = cnt * 100,
-            name = 'product %d' % cnt,
-            description = 'product desc %d' % cnt,
-        )
+        return ProductModel.objects.create(**data)
 
     def setUp(self):
         item = self.item = self.create_item()
@@ -40,7 +45,7 @@ class BuyViewTest(APIMixin, TestCase):
         user = self.create_user()
         response = self.api_create(user=user, data=data)
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
 
         # check order object
         order = Order.objects.get()
@@ -51,7 +56,7 @@ class BuyViewTest(APIMixin, TestCase):
         # Falsy
         fields = ('payment_received', 'handled', 'additional_fee')
         for field in fields:
-            self.assertFalse(getattr[field])
+            self.assertFalse(getattr(order, field))
 
         # compare order and data
         pairs = (
@@ -77,7 +82,8 @@ class BuyViewTest(APIMixin, TestCase):
 
         # check return value
         content = self.load_json(response.content)
-
+        self.assertTrue(content['data']['CheckMacValue'])
+        content['data'].pop('CheckMacValue')
         self.assertEqual(content, {
             'method': 'POST',
             'url': settings.AioCheckOut_URL,
@@ -87,11 +93,21 @@ class BuyViewTest(APIMixin, TestCase):
                 'PaymentType': 'aio',
                 'ExpireDate': 7,
                 'MerchantTradeNo': order.order_no,
-                'ItemName': item.title,
+                'ItemName': item.name,
                 'TradeDesc': item.description,
                 'TotalAmount': item.price,
-                'ClientBackURL': 'https://example.com',
                 'MerchantTradeDate': format_time(order.time_created),
-                'ReturnURL': 'https://www.ecpay.com.tw/receive.php',
+                'ClientBackURL': 'http://example.com/return/%d' % item.pk,
+                'ItemURL': 'http://example.com/info/%d' % item.pk,
+                'ReturnURL': 'http://example.com/pn/pn/ecpay_aio',
+                'EncryptType': 1,
             }
         })
+
+        def test_price_zero(self):
+            # should be rejected
+            raise NotImplementedError()
+
+        def test_inactive(self):
+            # should be rejected
+            raise NotImplementedError()

@@ -43,16 +43,16 @@ class ECPayAIOBackend(PaymentBackend):
     def get_ALL_payment_form(self, order, product):
         form = ECPayPayForm(data={
             "MerchantTradeNo": order.order_no,
-            "MerchantTradeDate": format_time(order.time_created),
+            "MerchantTradeDate": order.time_created,
             "PaymentType": "aio",
-            "ChoosePayment": order.PaymentMethod,
+            "ChoosePayment": order.payment_method,
             "TotalAmount": order.payment_amount,
             "TradeDesc": order.description[0:200],
             "ItemName": order.title[0:200],
             "ReturnURL": self.pn_url(),
-            "ChoosePayment": "Credit",
+            "ChoosePayment": 'ALL',
             "ClientBackURL": product.return_url,
-            "ItemUrl": product.url,
+            "ItemURL": product.url,
         })
         return form
 

@@ -17,4 +17,4 @@ class ProductOne(Product):
 
     @property
     def is_active(self):
-        return super().is_active() and self.product.is_active
+        return super().is_active() and self.item.is_active

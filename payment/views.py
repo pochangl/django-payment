@@ -51,10 +51,10 @@ class BuyView(CreateAPIView):
         product = data['product']
         pform = data['backend'](request=self.request).get_payment_form(order=order, product=product)
         if pform.is_valid():
-            headers = self.get_success_headers(serializer.data)
+            headers = self.get_success_headers(data)
             return Response({
                 'data': pform.cleaned_data,
-                'url': data['product_type'].get_product_url(order=order),
+                'url': pform.submit_url,
                 'method': 'POST',
             }, status=status.HTTP_201_CREATED, headers=headers)
         else:

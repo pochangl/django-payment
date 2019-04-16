@@ -1,4 +1,5 @@
 import copy
+import json
 from django.contrib.auth import get_user_model
 from django.db.models import Model
 from django.urls import reverse
@@ -63,7 +64,7 @@ class ClientMixin(AccountMixin):
         '''
         user = user if (user is not None) and (not user.is_anonymous()) else self.create_user()
 
-        client = self.client_class()
+        client = self.client_class(HTTP_HOST='example.com')
         client.user = user
         client.credentials(HTTP_AUTHORIZATION='Token ' + user.auth_token.key)
         return client
@@ -72,6 +73,12 @@ class ClientMixin(AccountMixin):
 class APIMixin(ClientMixin):
     client_class = APIClient
     is_viewset = False
+
+    def load_json(self, content):
+        if not isinstance(content, str):
+            return json.loads(str(content, encoding='utf8'))
+        else:
+            return json.loads(content)
 
     def get_url(self, **kwargs):
         if self.is_viewset:

@@ -13,13 +13,14 @@ class TestPayAllForm(TestCase):
         'MerchantTradeDate': '2013/03/12 15:30:23',
         'MerchantTradeNo': 'ecpay20130312153023',
         'PaymentType': 'aio',
-        'ReturnURL': 'https://www.ecpay.com.tw/receive.php',
+        'ReturnURL': 'https://example.com',
         'TotalAmount': 1000,
         'TradeDesc': '促銷方案',
         'ClientBackURL': 'https://example.com',
         'ExpireDate': 7,
+        'ItemURL': 'https://example.com',
     }
-    cmv = '1565694EB29C358B1C7B4FE2088A56B046F620BB9B405DE93FA41D3C31A510CD'
+    cmv = '935B75AA25C207F8C415122DC3BA5058DC7CF410DF25D4B7F8C0D5714FCD4AF1'
 
     def setUp(self):
         self.input_data = data = self.data.copy()
@@ -38,11 +39,11 @@ class TestPayAllForm(TestCase):
 
     def test_auto_field_generation(self):
         data = self.input_data.copy()
-        fields = ('MerchantID', 'EncryptType', 'ExpireDate', 'MerchantTradeDate')
+        fields = ('MerchantID', 'EncryptType', 'ExpireDate')
         for field in fields:
             data.pop(field, None)
         form = ECPayPayForm(data=data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         for field in fields:
             self.assertTrue(form.cleaned_data[field])
 

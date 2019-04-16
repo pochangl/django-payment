@@ -49,8 +49,6 @@ invalid_ecpay_fields = [
     # ("PaymentDate","2014/01/10 03:06:42"),
     ("PaymentDate", "2014/01/10 03:06:042"),
     ("PaymentDate", "2014/01010 03:06:4a"),
-    ("PaymentType", "Credi"),
-    ("PaymentType", "aCVS_"),
     # ("PaymentTypeChargeFee","1"),
     ("PaymentTypeChargeFee", "a"),
     # ("TradeDate","2014/01/10 03:04:53"),

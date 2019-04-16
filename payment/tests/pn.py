@@ -91,8 +91,7 @@ class PNTestBase:
             self.assert_valid_response(response)
 
     def test_pn(self):
-        resolve_match = resolve(reverse('pn',
-                                        kwargs={"backend": self.backend_name}))
+        resolve_match = resolve(reverse('pn', kwargs={"backend": self.backend_name}))
         pn_view = resolve_match.func
 
         self.send_valid_pns(pn_view, self.available_pns)
@@ -104,12 +103,18 @@ class PNTestBase:
             input = pn_input.copy()
             input[field_name] = value
             input = self.clean_invalid_inputs(input)
-            request = self.factory.post(reverse('pn',
-                                                kwargs=resolve_match.kwargs),
-                                        data=input)
-            response = pn_view(request,
-                               *resolve_match.args,
-                               **resolve_match.kwargs)
+            request = self.factory.post(
+                reverse(
+                    'pn',
+                    kwargs=resolve_match.kwargs
+                ),
+                data=input
+            )
+            response = pn_view(
+                request,
+                *resolve_match.args,
+                **resolve_match.kwargs
+            )
             self.assert_invalid_response(response)
 
         # for log in PaymentErrorLog.objects.all():
