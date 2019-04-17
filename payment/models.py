@@ -1,9 +1,11 @@
+import calendar
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.shortcuts import reverse
+from django.utils.timezone import now
 
 
 class TimeStampedModel(models.Model):
@@ -63,4 +65,5 @@ class Order(TimeStampedModel):
     content_object = GenericForeignKey('content_type', 'object_id')
 
     def create_order_no(self):
-        setattr(self, "order_no", format(self.pk, '020'))
+        stamp = calendar.timegm(now().timetuple())
+        self.order_no = '%dT%d' % (stamp, self.pk)
