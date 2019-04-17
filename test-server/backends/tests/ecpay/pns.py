@@ -9,7 +9,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 from django.test import TestCase
-from payment.tests import PNTestBase
+from package.tests import PNTestBase
 from payment.backends.ecpay.settings import settings
 from payment.backends.ecpay.utils import get_CheckMacValue
 from payment.backends.ecpay import forms

@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'payment',
     'payment.backends.ecpay',
     'product',
+    'backends',
+    'package',
 ]
 
 MIDDLEWARE = [

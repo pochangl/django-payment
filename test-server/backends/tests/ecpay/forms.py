@@ -1,8 +1,8 @@
 import datetime
 from django.test import TestCase
-from ..forms import ECPayPayForm
-from ..utils import timezone
-from ..settings import settings
+from payment.backends.ecpay.forms import ECPayPayForm
+from payment.backends.ecpay.utils import timezone
+from payment.backends.ecpay.settings import settings
 
 
 class TestPayAllForm(TestCase):

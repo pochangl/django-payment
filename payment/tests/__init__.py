@@ -1,2 +1,1 @@
-from .pn import *
-from .views import *
+from .mixins import *

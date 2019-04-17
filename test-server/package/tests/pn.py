@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory
 from django.test import Client
 from django.core.urlresolvers import reverse, resolve
-from ..models import PaymentErrorLog, Order
+from payment.models import PaymentErrorLog, Order
 
 User = get_user_model()
 

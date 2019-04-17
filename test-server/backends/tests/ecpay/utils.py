@@ -1,8 +1,8 @@
 import datetime
 import pytz
 from django.test import TestCase
-from ..utils import generate_CheckMacValue, format_time
-from ..settings import settings
+from payment.backends.ecpay.utils import generate_CheckMacValue, format_time
+from payment.backends.ecpay.settings import settings
 
 
 class TestUtils(TestCase):

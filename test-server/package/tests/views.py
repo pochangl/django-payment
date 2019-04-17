@@ -4,8 +4,8 @@ from rest_framework import status
 from product.models import ProductModel
 from payment.backends.ecpay.settings import settings
 from payment.backends.ecpay.utils import format_time
-from .mixins import APIMixin
-from ..models import Order
+from payment.tests.mixins import APIMixin
+from payment.models import Order
 
 
 class BuyViewTest(APIMixin, TestCase):
