@@ -53,10 +53,14 @@ class ECPaySettings():
 class ECPayTestSettings(ECPaySettings):
     AioCheckOut_URL = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5"
     LookUpURL = "https://payment-stage.ecpay.com.tw/Cashier/QueryTradeInfo/V5"
+    MerchantID = '2000132'
+    HashKey = '5294y06JbISpM5x9'
+    HashIV = 'v77hoKGq4kWxNNIS'
+
     Test = True
 
 
-if "test" in sys.argv or production_settings.get('test', False):
+if "test" in sys.argv or production_settings.get('TEST', False):
     settings = ECPayTestSettings
 else:
     settings = ECPaySettings
