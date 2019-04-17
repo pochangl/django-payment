@@ -11,7 +11,7 @@ from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 from .models import PaymentErrorLog
 from .strategies import OffsiteStrategy
 from .pipes import receive_payment
@@ -42,6 +42,7 @@ class PNView(View):
 
 class BuyView(CreateAPIView):
     serializer_class = BuySerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})

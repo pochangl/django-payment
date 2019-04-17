@@ -1,6 +1,7 @@
 import copy
 import json
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.db.models import Model
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -9,6 +10,7 @@ from ..settings import products, backends
 from ..pipes import apply_order, payment_pipes
 
 User = get_user_model()
+HOST = 'example.com'
 
 class AccountMixin:
     def get_password(self, username):
@@ -37,6 +39,8 @@ class AccountMixin:
         Token.objects.create(user=user)
         return user
 
+    def get_anonymous(self):
+        return AnonymousUser()
 
 class ClientMixin(AccountMixin):
     def reverse(self, *args, **kwargs):
@@ -64,11 +68,14 @@ class ClientMixin(AccountMixin):
             return a logged in client
             user model can be found in client.user
         '''
-        user = user if (user is not None) and (not user.is_anonymous()) else self.create_user()
+        client = self.client_class(HTTP_HOST=HOST)
+        if user is None:
+            user = self.create_user()
 
-        client = self.client_class(HTTP_HOST='example.com')
-        client.user = user
-        client.credentials(HTTP_AUTHORIZATION='Token ' + user.auth_token.key)
+        if not user.is_anonymous():
+            client.user = user
+            client.credentials(HTTP_AUTHORIZATION='Token ' + user.auth_token.key)
+
         return client
 
 

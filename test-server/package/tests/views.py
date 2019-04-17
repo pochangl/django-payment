@@ -157,3 +157,12 @@ class BuyViewTest(APIMixin, TestCase):
         response = self.api_create(user=user, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.content)
         self.assertTrue(b'Price mismatch' in response.content, response.content)
+
+    def test_anonymous(self):
+        self.assertEqual(Order.objects.count(), 0)
+        data = self.data
+
+        user = self.get_anonymous()
+        response = self.api_create(user=user, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.content)

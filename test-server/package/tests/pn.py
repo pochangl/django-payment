@@ -127,3 +127,6 @@ class PNTestBase:
                          expected_errors,
                          "total_errors: %d, expected: %d" %
                          (total_errors, expected_errors))
+
+    def test_csrf_example(self):
+        pass
