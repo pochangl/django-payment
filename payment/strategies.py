@@ -43,7 +43,8 @@ class OffsiteStrategy(object):
             return self.payment_aborted(backend,
                                         fail_callback,
                                         self.request,
-                                        traceback.format_exc())
+                                        traceback.format_exc(),
+                                        form=form)
 
         details = backend.pn_details(form)
 
@@ -63,10 +64,10 @@ class OffsiteStrategy(object):
         success_callback(details)
         return backend.valid_response()
 
-    def payment_aborted(self, backend, error_callback, request, error_message):
+    def payment_aborted(self, backend, error_callback, request, error_message, form=None):
         error_callback(request, error_message)
         if settings.DEBUG or 'test' in sys.argv:
-            return backend.invalid_response(error_message)
+            return backend.invalid_response(error_message, form=form)
         else:
             return backend.invalid_response("")
 

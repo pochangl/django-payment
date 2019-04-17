@@ -13,7 +13,7 @@ from package.tests import PNTestBase
 from payment.backends.ecpay.settings import settings
 from payment.backends.ecpay.utils import get_CheckMacValue
 from payment.backends.ecpay import forms
-from payment.models import Order
+from payment.models import Order, PaymentErrorLog
 from product.models import ProductModel
 from django.core.urlresolvers import resolve, reverse
 
@@ -39,8 +39,6 @@ invalid_ecpay_fields = [
     ("MerchantID", "%s%s" %
      (settings.MerchantID[0:len(settings.MerchantID)-1], '0')),
     ("MerchantTradeNo", "meowmeowmeo"),
-    ("RtnCode", "0"),
-    ("RtnCode", "2"),
     # ("RtnMsg", "喵1"),
     # ("TradeNo", "140110030454740700000"),
     # ("TradeNo", "14011003045474070000"),
@@ -131,3 +129,35 @@ class ECPayTestBase(PNTestBase, TestCase):
         order = Order.objects.get()
         for field_name in field_names:
             self.assertTrue(getattr(order, field_name))
+
+    def test_transaction_cancel(self):
+        '''
+            must return 0|OK
+        '''
+        self.assertEqual(PaymentErrorLog.objects.count(), 0)
+        resolve_match = resolve(reverse('pn', kwargs={"backend": self.backend_name}))
+        pn_view = resolve_match.func
+
+        pn = {
+            'CustomField1':'',
+            'CustomField2':'',
+            'CustomField3':'',
+            'CustomField4':'',
+            'MerchantID':'2000132',
+            'MerchantTradeNo':'1555489476T2',
+            'PaymentDate':'0001/01/01 00:00:00',
+            'PaymentType':'Credit_CreditCard',
+            'PaymentTypeChargeFee':'1',
+            'RtnCode':'10100058',
+            'RtnMsg':'付款失敗',
+            'SimulatePaid':'0',
+            'StoreID':'',
+            'TradeAmt':'1688',
+            'TradeDate':'2019/04/17 16:24:36',
+            'TradeNo':'1904171624367334',
+            'CheckMacValue':'C469E19ED4B9BC2DAE82A95275A9F464228A44277D9F08806519A410CB16F5CF'
+        }
+
+        self.send_valid_pns(pn_view, [pn], form_check=False)
+
+        self.assertEqual(PaymentErrorLog.objects.count(), 1)

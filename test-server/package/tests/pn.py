@@ -75,19 +75,26 @@ class PNTestBase:
                             **resolve_match.kwargs)
             self.assert_invalid_response(response)
 
-    def send_valid_pns(self, view, inputs, *args, **kwargs):
+    def send_valid_pns(self, view, inputs, args=(), kwargs={}, form_check=True):
         resolve_match = \
             resolve(reverse('pn', kwargs={"backend": self.backend_name}))
         for i in range(0, len(inputs)):
             pn_input = self.clean_valid_inputs(inputs[i])
-            form = self.pn_form(pn_input)
-            self.assertTrue(form.is_valid(), form.errors)
-            request = self.factory.post(reverse('pn',
-                                                kwargs=resolve_match.kwargs),
-                                        data=pn_input)
-            response = view(request,
-                            *resolve_match.args,
-                            **resolve_match.kwargs)
+            if form_check:
+                form = self.pn_form(pn_input)
+                self.assertTrue(form.is_valid(), form.errors)
+            request = self.factory.post(
+                reverse(
+                    'pn',
+                    kwargs=resolve_match.kwargs
+                ),
+                data=pn_input
+            )
+            response = view(
+                request,
+                *resolve_match.args,
+                **resolve_match.kwargs
+            )
             self.assert_valid_response(response)
 
     def test_pn(self):
