@@ -5,6 +5,8 @@ from django.db.models import Model
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
+from ..settings import products, backends
+from ..pipes import apply_order, payment_pipes
 
 User = get_user_model()
 
@@ -95,3 +97,38 @@ class APIMixin(ClientMixin):
         data = self.clean_data(data)
         client = self.get_logged_in_client(user=user)
         return client.post(self.get_url(), data=data, format='json')
+
+class TestPaymentSetupMixin:
+    def test_url(self):
+        reverse('pn', kwargs={'backend': 'bak'})
+        reverse('buy')
+
+    def test_products(self):
+        self.assertGreater(len(products.keys()), 0)
+        self.assertGreater(len(backends.keys()), 0)
+
+    def test_pipes(self):
+        self.assertGreater(len(payment_pipes), 0)
+
+
+class TestProductMixin:
+    def create_item(self, **kwargs):
+        return self.product_class.Meta.model.objects.create(**kwargs)
+
+    def create_product(self):
+        return self.product_class(item=self.create_item(), backend=self.backend)
+
+    def create_order(self, owner, payment_method):
+        product = self.create_product()
+        return product.create_order(owner=owner, payment_method=payment_method)
+
+    def test_backend(self):
+        self.assertTrue(self.backend.backend_name in backends)
+
+    def test_product(self):
+        self.assertTrue(self.product_class.name in products)
+
+    def apply(self, order):
+        self.assertFalse(order.handled)
+        apply_order(order=order)
+        self.assertTrue(order.handled)
