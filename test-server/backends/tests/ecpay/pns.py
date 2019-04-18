@@ -98,7 +98,7 @@ class ECPayTestBase(PNTestBase, TestCase):
         return valid_input
 
     def assert_invalid_response(self, response):
-        self.assertEqual(response.content[0:2], b'0|', response.content)
+        self.assertEqual(response.content, b'0|error', response.content)
 
     def assert_valid_response(self, response):
         self.assertEqual(response.content, b'1|OK', response.content)

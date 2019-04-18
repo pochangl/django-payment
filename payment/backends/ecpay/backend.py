@@ -90,8 +90,8 @@ class ECPayAIOBackend(PaymentBackend):
     def valid_response(self):
         return HttpResponse("1|OK")
 
-    def invalid_response(self, error_message, form):
+    def invalid_response(self, form):
         if int(form.data['RtnCode']) != 1:
             return HttpResponse('1|OK')
         else:
-            return HttpResponse("0|error"+error_message)
+            return HttpResponse("0|error")

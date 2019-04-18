@@ -66,7 +66,7 @@ class OffsiteStrategy(object):
 
     def payment_aborted(self, backend, error_callback, request, error_message, form=None):
         error_callback(request, error_message)
-        return backend.invalid_response(error_message, form=form)
+        return backend.invalid_response(form=form)
 
     def get_payment_form(self, order, title, payment_amount, description,
                          time_created, user_return_url, payment_type):
