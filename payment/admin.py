@@ -3,23 +3,15 @@ from django.contrib.admin.utils import flatten_fieldsets
 from .models import Order, PaymentErrorLog
 
 
-class ReadOnlyAdmin(admin.ModelAdmin):
-    def get_readonly_fields(self, request, obj=None):
-        if self.declared_fieldsets:
-            return flatten_fieldsets(self.declared_fieldsets)
-        else:
-            return list(set(
-                [field.name for field in self.opts.local_fields] +
-                [field.name for field in self.opts.local_many_to_many]
-            ))
-
-class OrderAdmin(ReadOnlyAdmin):
+class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'order_no', 'owner', 'product_class', 'title', 'payment_amount', 'payment_received', 'handled')
+    readonly_fields = list_display
 
 
-class ErrorAdmin(ReadOnlyAdmin):
+class ErrorAdmin(admin.ModelAdmin):
     list_display = ('id', 'path', 'resolved')
     list_filter = ('resolved', )
+    readonly_fields = list_display
 
 admin.site.register(Order, OrderAdmin)
 admin.site.register(PaymentErrorLog, ErrorAdmin)
