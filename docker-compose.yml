@@ -21,6 +21,8 @@ services:
     networks:
       backend:
         ipv4_address: 10.3.0.2
+    volumes:
+      - ./db/initial.sql:/docker-entrypoint-initdb.d/initial.sql
 
 networks:
   backend:
