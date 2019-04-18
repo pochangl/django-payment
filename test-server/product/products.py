@@ -13,7 +13,10 @@ class ProductOne(Product):
         model = ProductModel
 
     def apply(self, user):
-        self.item.buyers.add(user)
+        item = self.item
+        item.buyers.add(user)
+        item.count += 1
+        item.save()
 
     def is_active(self):
         return super().is_active() and self.item.is_active

@@ -105,6 +105,7 @@ class APIMixin(ClientMixin):
         client = self.get_logged_in_client(user=user)
         return client.post(self.get_url(), data=data, format='json')
 
+
 class TestPaymentSetupMixin:
     def test_url(self):
         reverse('pn', kwargs={'backend': 'bak'})

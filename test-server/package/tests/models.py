@@ -2,6 +2,7 @@ import re
 from django.test import TestCase
 from payment.models import Order
 
+
 class TestOrder(TestCase):
     def test_order(self):
         order = Order()

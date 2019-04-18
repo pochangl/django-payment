@@ -9,3 +9,4 @@ class ProductModel(models.Model):
     buyers = models.ManyToManyField('auth.User')
 
     is_active = models.BooleanField(default=False)
+    count = models.IntegerField(default=0) ## count how many times applied

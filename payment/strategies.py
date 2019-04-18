@@ -47,9 +47,8 @@ class OffsiteStrategy(object):
                                         form=form)
 
         details = backend.pn_details(form)
-
-        if details["is_simulation"] and (not self.payment_backend.is_test):
-            return backend.invalid_response()
+        if details["is_simulation"]:
+            return backend.valid_response()
             # pass
 
         try:
@@ -58,7 +57,8 @@ class OffsiteStrategy(object):
             return self.payment_aborted(backend,
                                         fail_callback,
                                         self.request,
-                                        traceback.format_exc())
+                                        traceback.format_exc(),
+                                        form=form)
 
     def payment_succeed(self, backend, success_callback, details):
         success_callback(details)
@@ -66,10 +66,7 @@ class OffsiteStrategy(object):
 
     def payment_aborted(self, backend, error_callback, request, error_message, form=None):
         error_callback(request, error_message)
-        if settings.DEBUG or 'test' in sys.argv:
-            return backend.invalid_response(error_message, form=form)
-        else:
-            return backend.invalid_response("")
+        return backend.invalid_response(error_message, form=form)
 
     def get_payment_form(self, order, title, payment_amount, description,
                          time_created, user_return_url, payment_type):

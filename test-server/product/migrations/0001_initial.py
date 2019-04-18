@@ -24,6 +24,7 @@ class Migration(migrations.Migration):
                 ('price', models.PositiveIntegerField()),
                 ('is_active', models.BooleanField(default=False)),
                 ('buyers', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
+                ('count', models.IntegerField(default=0))
             ],
         ),
     ]

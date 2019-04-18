@@ -71,16 +71,23 @@ class ECPayTestBase(PNTestBase, TestCase):
             **kwargs
         )
 
+    def create_order_from_pn(self, pn):
+        order = self.create_order(
+            order_no=pn['MerchantTradeNo'],
+            payment_amount=pn['TradeAmt'],
+        )
+        model_class = order.content_type.model_class()
+        pk = order.object_id
+        model_class.objects.create(pk=pk, name=pk, description=pk, price=order.payment_amount)
+        return order
+
+    def create_item(self):
+        return ProductModel.objects.create(pk=1, )
+
     def setUp(self):
         super().setUp()
-        for pns in self.available_pns:
-            order = self.create_order(
-                order_no=pns['MerchantTradeNo'],
-                payment_amount=pns['TradeAmt'],
-            )
-            model_class = order.content_type.model_class()
-            pk = order.object_id
-            model_class.objects.create(pk=pk, name=pk, description=pk, price=pk)
+        for pn in self.available_pns:
+            self.create_order_from_pn(pn)
 
     def clean_invalid_inputs(self, invalid_input):
         invalid_input["CheckMacValue"] = get_CheckMacValue(invalid_input)
@@ -96,6 +103,11 @@ class ECPayTestBase(PNTestBase, TestCase):
     def assert_valid_response(self, response):
         self.assertEqual(response.content, b'1|OK', response.content)
 
+    @property
+    def pn_view(self):
+        resolve_match = resolve(reverse('pn', kwargs={"backend": self.backend_name}))
+        return resolve_match.func
+
     def test_pn(self):
         order = Order.objects.get()
         self.assertEqual(order.additional_fee, 0)
@@ -107,24 +119,34 @@ class ECPayTestBase(PNTestBase, TestCase):
         self.assertIsNotNone(order.payment_received)
 
     def test_product_apply(self):
-        resolve_match = resolve(reverse('pn', kwargs={"backend": self.backend_name}))
-        pn_view = resolve_match.func
         order = Order.objects.get()
         product = ProductModel.objects.get()
 
         self.assertEqual(product.buyers.count(), 0)
-        self.send_valid_pns(pn_view, self.available_pns)
+        self.assertEqual(product.count, 0)
+        self.send_valid_pns(self.pn_view, self.available_pns)
+
+        product = ProductModel.objects.get()
         self.assertEqual(product.buyers.get(), order.owner)
+        self.assertEqual(product.count, 1)
+
+    def test_repeat_pn(self):
+        order = Order.objects.get()
+        product = ProductModel.objects.get()
+        self.send_valid_pns(self.pn_view, self.available_pns)
+        self.send_valid_pns(self.pn_view, self.available_pns)
+
+        product = ProductModel.objects.get()
+        self.assertEqual(product.buyers.get(), order.owner)
+        self.assertEqual(product.count, 1)
 
     def test_pipe_apply(self):
-        resolve_match = resolve(reverse('pn', kwargs={"backend": self.backend_name}))
-        pn_view = resolve_match.func
         order = Order.objects.get()
         field_names = ['payment_received', 'additional_fee', 'handled']
         # Falsy
         for field_name in field_names:
             self.assertFalse(getattr(order, field_name))
-        self.send_valid_pns(pn_view, self.available_pns)
+        self.send_valid_pns(self.pn_view, self.available_pns)
 
         order = Order.objects.get()
         for field_name in field_names:
@@ -135,8 +157,6 @@ class ECPayTestBase(PNTestBase, TestCase):
             must return 0|OK
         '''
         self.assertEqual(PaymentErrorLog.objects.count(), 0)
-        resolve_match = resolve(reverse('pn', kwargs={"backend": self.backend_name}))
-        pn_view = resolve_match.func
 
         pn = {
             'CustomField1':'',
@@ -158,6 +178,38 @@ class ECPayTestBase(PNTestBase, TestCase):
             'CheckMacValue':'C469E19ED4B9BC2DAE82A95275A9F464228A44277D9F08806519A410CB16F5CF'
         }
 
-        self.send_valid_pns(pn_view, [pn], form_check=False)
+        self.send_valid_pns(self.pn_view, [pn], form_check=False)
 
         self.assertEqual(PaymentErrorLog.objects.count(), 1)
+
+    def test_simulated_success(self):
+        # simulation should not apply and should not return fail disregard it's actual state
+        pn = {
+            "PaymentType":"BARCODE_BARCODE",
+            "RtnMsg":"付款成功",
+            "SimulatePaid":"1",
+            "CustomField2":"",
+            "PaymentDate":"2019/04/17 20:12:21",
+            "TradeNo":"1904171757027487",
+            "TradeAmt":"999",
+            "MerchantID":"2000132",
+            "StoreID":"",
+            "CustomField3":"",
+            "MerchantTradeNo":"1555495021T6",
+            "CustomField4":"",
+            "CheckMacValue":"E1797F7FF339A78BC9B1076CF158B95083B0C7205828F4F57D5BF88765FC4AFB",
+            "TradeDate":"2019/04/17 17:57:02",
+            "CustomField1":"",
+            "RtnCode":"1",
+            "PaymentTypeChargeFee":"15"
+        }
+
+        Order.objects.all().delete()
+        ProductModel.objects.all().delete()
+        self.assertEqual(PaymentErrorLog.objects.count(), 0)
+        order = self.create_order_from_pn(pn)
+        self.assertEqual(order.content_object.buyers.count(), 0)
+        self.send_valid_pns(self.pn_view, [pn], form_check=False)
+
+        self.assertEqual(PaymentErrorLog.objects.count(), 0)
+        self.assertEqual(order.content_object.buyers.count(), 0)

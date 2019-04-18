@@ -72,7 +72,10 @@ class ECPayAIOBackend(PaymentBackend):
         params = decode_params(response.content.decode('utf-8'))
         pn_form.raw_data = params
         status = params["TradeStatus"]
-        if int(params["TradeAmt"]) != pn_form.cleaned_data["TradeAmt"]:
+
+        if pn_form.cleaned_data['SimulatePaid']:
+            return True
+        elif int(params["TradeAmt"]) != pn_form.cleaned_data["TradeAmt"]:
             raise ValidationError(
                 "payment amount mismatch MerchantTradeNo: %s, %s: %s" %
                 (params["MerchantTradeNo"],
@@ -83,10 +86,6 @@ class ECPayAIOBackend(PaymentBackend):
                 (__name__, inspect.currentframe().f_back.f_lineno, status,
                  settings.TradeStatusCode[status]))
         return True
-
-    @property
-    def is_test(self):
-        return super().is_debug and settings.Test
 
     def valid_response(self):
         return HttpResponse("1|OK")
