@@ -123,11 +123,15 @@ class TestProductMixin:
     def create_item(self, **kwargs):
         return self.product_class.Meta.model.objects.create(**kwargs)
 
-    def create_product(self):
-        return self.product_class(item=self.create_item(), backend=self.backend)
+    def create_product(self, item=None, backend=None, request=None):
+        return self.product_class(
+            item=item or self.create_item(),
+            backend=backend or self.backend,
+            request=request
+        )
 
-    def create_order(self, owner, payment_method):
-        product = self.create_product()
+    def create_order(self, owner, payment_method, product=None):
+        product = product or self.create_product()
         return product.create_order(owner=owner, payment_method=payment_method)
 
     def test_backend(self):
