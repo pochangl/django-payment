@@ -50,11 +50,16 @@ class Product:
 
     def get_return_url(self, order):
         # where user should return after done with purchasing
-        return self.request.build_absolute_uri(reverse(self.return_view_name, kwargs={'pk': order.pk}))
+        return self.request.build_absolute_uri(reverse(self.return_view_name, kwargs=self.get_return_url_kwargs(order)))
 
     def get_url_kwargs(self):
         return {
             'pk': self.item.pk
+        }
+
+    def get_return_url_kwargs(self, order):
+        return {
+            'pk': order.pk
         }
 
     def create_order(self, owner, payment_method, **kwargs):
