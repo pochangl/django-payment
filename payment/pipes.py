@@ -73,5 +73,5 @@ def apply_order(order, **kwargs):
     order.handled = True
     order.save()
 
-payment_pipes = settings.SUCCESS_PAYMENT_PIPE if hasattr(settings, 'SUCCESS_PAYMENT_PIPE') else default_pipes
+payment_pipes = default_pipes + getattr(settings, 'SUCCESS_PAYMENT_PIPE', [])
 payment_pipes = load_pipe(payment_pipes)
