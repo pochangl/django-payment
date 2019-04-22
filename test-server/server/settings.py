@@ -149,6 +149,9 @@ PAYMENT = {
     ],
     'PRODUCTS': [
         'product.products.ProductOne'
+    ],
+    'SUCCESS_PIPE': [
+        'product.pipes.increment'
     ]
 }
 

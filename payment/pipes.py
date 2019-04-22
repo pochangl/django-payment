@@ -7,6 +7,12 @@ from .models import Order
 from .exceptions import DuplicatePayment
 from .settings import backends, products
 
+__all__ = [
+    'update_order',
+    'apply_order',
+    'receive_payment',
+    'payment_pipes',
+]
 
 # pip loading
 default_pipes = [
@@ -22,6 +28,7 @@ def load_pipe(pipe_variable):
         obj = getattr(m, obj_name)
         pipes.append(obj)
     return pipes
+
 
 def receive_payment(details):
     kwargs = {
@@ -72,6 +79,9 @@ def apply_order(order, **kwargs):
     product.apply(order.owner)
     order.handled = True
     order.save()
+    return {
+        'product': product
+    }
 
-payment_pipes = default_pipes + getattr(settings, 'SUCCESS_PAYMENT_PIPE', [])
+payment_pipes = default_pipes + settings.PAYMENT.get('SUCCESS_PIPE', [])
 payment_pipes = load_pipe(payment_pipes)

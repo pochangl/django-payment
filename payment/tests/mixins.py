@@ -119,7 +119,7 @@ class TestPaymentSetupMixin:
         self.assertGreater(len(payment_pipes), 0)
 
 
-class TestProductMixin:
+class ProductMixin:
     def create_item(self, **kwargs):
         return self.product_class.Meta.model.objects.create(**kwargs)
 
@@ -134,6 +134,8 @@ class TestProductMixin:
         product = product or self.create_product()
         return product.create_order(owner=owner, payment_method=payment_method)
 
+
+class TestProductMixin(ProductMixin):
     def test_backend(self):
         self.assertTrue(self.backend.backend_name in backends)
 
