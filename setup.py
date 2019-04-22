@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='Payment',
-    version='0.1.4',
+    version='0.1.5',
     author='Pochang Lee',
     author_email='stupidgod08@yahoo.com.tw',
     description='A django package made for handling third party payment',
