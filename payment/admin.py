@@ -4,7 +4,7 @@ from .models import Order, PaymentErrorLog
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order_no', 'owner', 'product_class', 'title', 'payment_amount', 'payment_received', 'handled')
+    list_display = ('id', 'order_no', 'owner', 'product_class', 'title', 'payment_amount', 'payment_received', 'handled', 'time_created')
     readonly_fields = list_display
 
 
