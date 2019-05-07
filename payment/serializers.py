@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from .fields import BackendField, ProductField
+from .models import Code
 
 
 class BuySerializer(serializers.Serializer):
@@ -36,3 +37,14 @@ class BuySerializer(serializers.Serializer):
     def create(self, data):
         owner = self._context['request'].user
         return data['product'].create_order(owner=owner, payment_method=data['payment_method'])
+
+
+class CodeField(serializers.CharField):
+    def to_internal_value(self, data):
+        try:
+            return Code.objects.get(code=data)
+        except Code.DoesNotExist:
+            raise ValidationError('Code does not exist')
+
+    def to_representation(self, value):
+        return str(value)

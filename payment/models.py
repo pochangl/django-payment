@@ -1,9 +1,12 @@
 import calendar
 from django.core.mail import send_mail
+from django.core.signing import Signer
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch.dispatcher import receiver
 from django.shortcuts import reverse
 from django.utils.timezone import now
 
@@ -67,3 +70,36 @@ class Order(TimeStampedModel):
     def create_order_no(self):
         stamp = calendar.timegm(now().timetuple())
         self.order_no = '%dT%d' % (stamp, self.pk)
+
+
+signer = Signer(salt="code")
+
+
+class Code(TimeStampedModel):
+    code = models.CharField(max_length=128, unique=True, null=True, default=None)
+    time_start = models.DateTimeField()
+    time_end = models.DateTimeField()
+
+    @property
+    def is_valid(self):
+        return self.time_start <= now() < self.time_end
+
+    def generate_code(self):
+        if not self.pk:
+            raise Exception('Model must be saved before automatic code generation')
+        elif self.code is None:
+            return signer.sign(self.pk)
+
+    def post_save(self):
+        code = self.generate_code()
+        if code:
+            self.code = code
+            self.save()
+
+    def __str__(self):
+        return self.code
+
+@receiver(post_save, sender=Code)
+def code_generation(instance, created, *args, **kwargs):
+    if created:
+        instance.post_save()
