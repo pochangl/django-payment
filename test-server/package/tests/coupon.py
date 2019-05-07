@@ -88,6 +88,11 @@ class TestCodeGeneration(CodeMixin, TestCase):
         self.assertEqual(Code.objects.count(), 4)
         self.assertEqual(Code.objects.actives().get(), code)
 
+    def test_deactivate(self):
+        code = self.create_code()
+        self.assertTrue(code.is_valid())
+        code.deactivate()
+        self.assertFalse(code.is_valid())
 
 class TestCodeField(CodeMixin, TestCase):
     class Serializer(serializers.Serializer):

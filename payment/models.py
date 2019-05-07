@@ -4,7 +4,7 @@ from django.core.signing import Signer
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
 from django.shortcuts import reverse
@@ -101,6 +101,13 @@ class Code(TimeStampedModel):
 
     def __str__(self):
         return self.code
+
+    @transaction.atomic
+    def deactivate(self):
+        code = Code.objects.select_for_update().get(pk=self.pk)
+        assert code.is_active
+        self.is_active = False
+        self.save()
 
 
 @receiver(post_save, sender=Code)
