@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
 from django.shortcuts import reverse
 from django.utils.timezone import now
+from .managers import CodeManager
 
 
 class TimeStampedModel(models.Model):
@@ -79,10 +80,12 @@ class Code(TimeStampedModel):
     code = models.CharField(max_length=128, unique=True, null=True, default=None)
     time_start = models.DateTimeField()
     time_end = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
 
-    @property
+    objects = CodeManager()
+
     def is_valid(self):
-        return self.time_start <= now() < self.time_end
+        return self.is_active and self.time_start <= now() < self.time_end
 
     def generate_code(self):
         if not self.pk:
@@ -98,6 +101,7 @@ class Code(TimeStampedModel):
 
     def __str__(self):
         return self.code
+
 
 @receiver(post_save, sender=Code)
 def code_generation(instance, created, *args, **kwargs):
