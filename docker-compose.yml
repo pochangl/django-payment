@@ -15,7 +15,6 @@ services:
 
   db:
     image: mariadb
-    restart: always
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     networks:
