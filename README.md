@@ -56,6 +56,7 @@ PAYMENT = {
         'product.products.ProductOne'
     ],
     'SUCCESS_PIPE': [
+        # 無關產品本身的事件可以放這裡, 像是寄email通知之類的
         'product.pipes.increment'
     ]
 }
@@ -78,10 +79,22 @@ SUCCESS_PIPE - <class list>
 from payment.products import Product
 
 class ProductOne(Product):
+
     name = 'product_one'
+    # 產品的英文名字, 盡量只用SlugField的字元吧, 未來會強制使用slug
+    
     serializer_class = ProductModelSerializer
+    #
+    
+    
     return_view_name = 'return_page'
+    # 付款完成後的訂單頁
+    # reverse(return_view_name, kwargs={'pk': order.pk})
+    
+    
     view_name = 'product_info'
+    # 產品頁面的 reverse name
+    # reverse(view_name, kwargs={'pk': product.pk})
 
     class Meta:
         model = ProductModel
@@ -94,3 +107,15 @@ class ProductOne(Product):
         return super().is_active() and self.item.is_active
 
 ```
+
+## url.py
+
+在最底層的url.py加入
+```python
+urlpatterns = [
+    ...,
+    url(r'^pn/', include('payment.urls'))
+]
+```
+
+
