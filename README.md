@@ -5,7 +5,7 @@
 ## 安裝
 ### 方法1: pip 安裝
 ```bash
-pip install git+https://github.com/pochangl/django-payment.git@v0.1.6
+pip install git+https://github.com/pochangl/django-payment.git@v0.1.8
 ```
 
 ### 方法2: requirements.txt 安裝
@@ -13,7 +13,7 @@ pip install git+https://github.com/pochangl/django-payment.git@v0.1.6
 在你的requirements.txt加入這行
 
 ```
-git+git://github.com/pochangl/django-payment.git@v0.1.6
+git+git://github.com/pochangl/django-payment.git@v0.1.8
 ```
 
 然後執行
