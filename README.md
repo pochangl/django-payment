@@ -1,6 +1,5 @@
 # django-payment
-Simple payment system for my django project
-
+基本上這是一個架構在django & django rest framework之上的付款機制.
 
 
 ## 安裝
@@ -59,7 +58,7 @@ PAYMENT = {
         'payment.backends.ecpay.backend.ECPayAIOBackend',
     ],
     'PRODUCTS': [
-        # 註冊產品英文名字
+        # 註冊產品
         'product.products.ProductOne',
     ],
     'SUCCESS_PIPE': [
@@ -70,30 +69,36 @@ PAYMENT = {
 }
 ```
 
-## 建立第一個產品
+## 建立第一個產品 Book
 
 ### Book
 
 ```python
 class Book(models.Model):
-    book_title = models.CharField(max_length=16)
-    book_description = models.CharField(max_length=16)
-    book_price = models.PositiveIntegerField()
+    '''
+        示範用, 書的Model
 
-    is_active = models.BooleanField(default=False)
+    '''
+    book_title = models.CharField(max_length=16) # 書名
+    book_description = models.CharField(max_length=16) # 書的描述
+    book_price = models.PositiveIntegerField() # 價錢
+    buyers = models.ManyToManyField('auth.User', through='product.BookOwner') # 購買者, 連結到下面的BookOwner
+    is_active = models.BooleanField(default=False) # 是否上架
 
 class BookOwner(models.Model):
+    '''
+        示範用, 購買的人
+    '''
     user = models.ForeignKey('auth.User')
     book = models.ForeignKey(Book)
 
 ```
 
 
-
 ## 取得產品資訊 (ProductSerializer)
 
-這玩意會把 Book的名字, 價格, 跟描述取出來, 接下來的就丟給
-基本上就 [名字, 價格, 描述] 3欄
+這玩意會把 Book的名字, 價格, 跟描述取出來給backend處理.
+基本上就 [名字, 價格, 描述] 這3欄
 
 ```python
 
@@ -103,9 +108,9 @@ from .models import Book
 
 
 class BookProductSerializer(ProductSerializer):
-    name = serializers.CharField(source='book_title')
-    price = serializers.IntegerField(source='book_price')
-    description = serializers.CharField(source='book_description')
+    name = serializers.CharField(source='book_title') # 產品名稱
+    price = serializers.IntegerField(source='book_price') # 產品價錢 book.book_price
+    description = serializers.CharField(source='book_description') # 產品描述 book.book_description
 
     class Meta:
         model = Book
@@ -117,7 +122,7 @@ class BookProductSerializer(ProductSerializer):
 ```
 
 
-## 產品Class
+## 產品處理(Product)
 
 ```python
 from payment.products import Product
@@ -133,19 +138,17 @@ class BookProduct(Product):
 
 
     return_view_name = 'return_page'
-    # 付款完成後的訂單頁
-    # reverse('return_page', kwargs={'pk': order.pk})
+    # 付款完成後的訂單頁 reverse('return_page', kwargs={'pk': order.pk})
 
 
     view_name = 'product_info'
-    # 產品頁面
-    # reverse('product_info', kwargs={'pk': product.pk})
+    # 產品頁面 reverse('product_info', kwargs={'pk': product.pk})
 
     class Meta:
         model = Book
 
     def apply(self, user, product):
-        # 處理交易內容
+        # 到款後, 讓交易成立
         BookOwner.objects.create(user=user, book=product)
 
     def is_active(self):
@@ -154,7 +157,7 @@ class BookProduct(Product):
 
 ```
 
-## url.py
+### url.py
 
 在最底層的url.py加入, 不要namespace
 
@@ -163,4 +166,18 @@ urlpatterns = [
     ...,
     url(r'^pn/', include('payment.urls'))
 ]
+```
+
+
+## 如何結帳
+丟個HTTP POST Request至 以下 data 到reverse('buy')就行了
+
+```python
+{
+    'backend': 'ecpay_aio', # 綠界後端
+    'product_type': 'book',
+    'product_id': product.id, # Book.id
+    'price': product.book_price, # Book.book_price
+    'payment_method': 'aio', # 綠界的All In One
+}
 ```
