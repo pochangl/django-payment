@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from .settings import backends
 from .settings import products
 
@@ -12,7 +12,7 @@ class BackendField(serializers.ChoiceField):
         try:
             return backends[data]
         except KeyError:
-            raise ValidationError('No such backend %s' % data)
+            raise exceptions.ValidationError('No such backend %s' % data)
 
 
 class ProductField(serializers.ChoiceField):
@@ -24,4 +24,4 @@ class ProductField(serializers.ChoiceField):
         try:
             return products[data]
         except KeyError:
-            raise ValidationError('No such product %s' % data)
+            raise exceptions.ValidationError('No such product %s' % data)

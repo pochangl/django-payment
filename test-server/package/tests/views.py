@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils.timezone import now
 from rest_framework import status
-from product.models import ProductModel
+from product.models import Book
 from payment.backends.ecpay.settings import settings
 from payment.backends.ecpay.utils import format_time
 from payment.tests.mixins import APIMixin
@@ -18,22 +18,22 @@ class BuyViewTest(APIMixin, TestCase):
         self._item_count += 1
         cnt = self._item_count
         data = {
-            'price': cnt * 100,
-            'name': 'product %d' % cnt,
-            'description': 'product desc %d' % cnt,
+            'book_price': cnt * 100,
+            'book_title': 'product %d' % cnt,
+            'book_description': 'product desc %d' % cnt,
             'is_active': True
         }
         data.update(kwargs)
 
-        return ProductModel.objects.create(**data)
+        return Book.objects.create(**data)
 
     def setUp(self):
         item = self.item = self.create_item()
         self.data = {
             'backend': 'ecpay_aio',
-            'product_type': 'product_one',
+            'product_type': 'book',
             'product_id': item.pk,
-            'price': item.price,
+            'price': item.book_price,
             'payment_method': 'ALL'
         }
 
@@ -71,9 +71,9 @@ class BuyViewTest(APIMixin, TestCase):
 
         # compares order and item
         pairs = (
-            ('title', 'name'),
-            ('payment_amount', 'price'),
-            ('description', 'description'),
+            ('title', 'book_title'),
+            ('payment_amount', 'book_price'),
+            ('description', 'book_description'),
         )
         for oattr, iattr in pairs:
             self.assertEqual(getattr(order, oattr), getattr(item, iattr))
@@ -93,9 +93,9 @@ class BuyViewTest(APIMixin, TestCase):
                 'PaymentType': 'aio',
                 'ExpireDate': 7,
                 'MerchantTradeNo': order.order_no,
-                'ItemName': item.name,
-                'TradeDesc': item.description,
-                'TotalAmount': item.price,
+                'ItemName': item.book_title,
+                'TradeDesc': item.book_description,
+                'TotalAmount': item.book_price,
                 'MerchantTradeDate': format_time(order.time_created),
                 'ClientBackURL': 'http://example.com/return/%d' % order.pk,
                 'ItemURL': 'http://example.com/info/%d' % item.pk,
@@ -106,8 +106,8 @@ class BuyViewTest(APIMixin, TestCase):
 
     def test_price_zero(self):
         item = self.item
-        price = item.price
-        item.price = 0
+        price = item.book_price
+        item.book_price = 0
         item.save()
         data = self.data.copy()
         data['price'] = 0
@@ -116,11 +116,11 @@ class BuyViewTest(APIMixin, TestCase):
         # should reject
         response = self.api_create(user=user, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.content)
+
         self.assertTrue(b'Product is not active' in response.content)
 
-        data['price'] = item.price = price
+        data['price'] = item.book_price = price
         item.save()
-
 
         # should accept
         response = self.api_create(user=user, data=data)
@@ -150,7 +150,7 @@ class BuyViewTest(APIMixin, TestCase):
         user = self.create_user()
         data = self.data
         item = self.item
-        item.price += 1
+        item.book_price += 1
         item.save()
 
         # should reject

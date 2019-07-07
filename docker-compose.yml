@@ -6,7 +6,7 @@ services:
     volumes:
       - ./test-server:/mnt/server
       - ./test-server/test.sh:/test.sh
-      - ./payment:/mnt/server/payment
+      - ./:/mnt/payment
     depends_on:
       - db
     networks:

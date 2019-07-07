@@ -80,16 +80,6 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'payment',
-        'CONN_MAX_AGE': 10,
-        'HOST': '10.3.0.2',
-        'PORT': '3306'
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -129,6 +119,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+
+    }
+}
 
 #
 PAYMENT_SETTINGS = {
@@ -138,21 +135,21 @@ PAYMENT_SETTINGS = {
             'HASH_KEY': '5294y06JbISpM5x9',
             'HASH_IV': 'v77hoKGq4kWxNNIS',
             'EXPIRE_DATE': 7,
-            'TEST': True
+            'TEST': True,
         }
     }
 }
 
 PAYMENT = {
     'BACKENDS': [
-        'payment.backends.ecpay.backend.ECPayAIOBackend'
+        'payment.backends.ecpay.backend.ECPayAIOBackend',
     ],
     'PRODUCTS': [
-        'product.products.ProductOne'
+        'product.products.BookProduct',
     ],
     'SUCCESS_PIPE': [
-        'product.pipes.increment'
-    ]
+        'product.pipes.increment',
+    ],
 }
 
 REST_FRAMEWORK = {

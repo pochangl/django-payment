@@ -14,7 +14,7 @@ from payment.backends.ecpay.settings import settings
 from payment.backends.ecpay.utils import get_CheckMacValue
 from payment.backends.ecpay import forms
 from payment.models import Order, PaymentErrorLog
-from product.models import ProductModel
+from product.models import Book
 from django.core.urlresolvers import resolve, reverse
 
 available_ecpay_pns = [
@@ -67,7 +67,7 @@ class ECPayTestBase(PNTestBase, TestCase):
     def create_order(self, **kwargs):
         return super().create_order(
             backend=self.backend_name,
-            product_class='product_one',
+            product_class='book',
             **kwargs
         )
 
@@ -78,11 +78,11 @@ class ECPayTestBase(PNTestBase, TestCase):
         )
         model_class = order.content_type.model_class()
         pk = order.object_id
-        model_class.objects.create(pk=pk, name=pk, description=pk, price=order.payment_amount)
+        model_class.objects.create(pk=pk, book_title=pk, book_description=pk, book_price=order.payment_amount)
         return order
 
     def create_item(self):
-        return ProductModel.objects.create(pk=1, )
+        return Book.objects.create(pk=1, )
 
     def setUp(self):
         super().setUp()
@@ -120,23 +120,23 @@ class ECPayTestBase(PNTestBase, TestCase):
 
     def test_product_apply(self):
         order = Order.objects.get()
-        product = ProductModel.objects.get()
+        product = Book.objects.get()
 
         self.assertEqual(product.buyers.count(), 0)
         self.assertEqual(product.count, 0)
         self.send_valid_pns(self.pn_view, self.available_pns)
 
-        product = ProductModel.objects.get()
+        product = Book.objects.get()
         self.assertEqual(product.buyers.get(), order.owner)
         self.assertEqual(product.count, 1)
 
     def test_repeat_pn(self):
         order = Order.objects.get()
-        product = ProductModel.objects.get()
+        product = Book.objects.get()
         self.send_valid_pns(self.pn_view, self.available_pns)
         self.send_valid_pns(self.pn_view, self.available_pns)
 
-        product = ProductModel.objects.get()
+        product = Book.objects.get()
         self.assertEqual(product.buyers.get(), order.owner)
         self.assertEqual(product.count, 1)
 
@@ -205,7 +205,7 @@ class ECPayTestBase(PNTestBase, TestCase):
         }
 
         Order.objects.all().delete()
-        ProductModel.objects.all().delete()
+        Book.objects.all().delete()
         self.assertEqual(PaymentErrorLog.objects.count(), 0)
         order = self.create_order_from_pn(pn)
         self.assertEqual(order.content_object.buyers.count(), 0)

@@ -75,8 +75,9 @@ def apply_order(order, **kwargs):
         return
     Product = products[order.product_class]
     backend = backends[order.backend]
-    product = Product(item=order.content_object, backend=backend)
-    product.apply(order.owner)
+    item = order.content_object
+    product = Product(item=item, backend=backend)
+    product.apply(user=order.owner, product=item)
     order.handled = True
     order.save()
     return {

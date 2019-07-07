@@ -1,20 +1,22 @@
 from payment.products import Product
-from .serializers import ProductModelSerializer
-from .models import ProductModel
+from .serializers import BookProductSerializer
+from .models import Book, BookOwner
 
 
-class ProductOne(Product):
-    name = 'product_one'
-    serializer_class = ProductModelSerializer
+__all__ = ['BookProduct']
+
+
+class BookProduct(Product):
+    name = 'book'
+    serializer_class = BookProductSerializer
     return_view_name = 'return_page'
     view_name = 'product_info'
 
     class Meta:
-        model = ProductModel
+        model = Book
 
-    def apply(self, user):
-        item = self.item
-        item.buyers.add(user)
+    def apply(self, user, product):
+        BookOwner.objects.create(user=user, book=product)
 
     def is_active(self):
         return super().is_active() and self.item.is_active

@@ -6,10 +6,9 @@ RUN pip install requests
 RUN pip install djangorestframework==3.6.2
 RUN pip install six
 
-RUN mkdir /mnt/server
-RUN mkdir /mnt/payment
+RUN mkdir /server
+RUN mkdir /payment
 
-RUN echo '' > /test.sh
 
-WORKDIR /mnt/server
+WORKDIR /server
 CMD /test.sh

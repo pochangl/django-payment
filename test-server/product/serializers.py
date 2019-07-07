@@ -1,13 +1,13 @@
 from rest_framework import serializers
 from payment.products import ProductSerializer
-from .models import ProductModel
+from .models import Book
 
 
-class ProductModelSerializer(ProductSerializer):
-    name = serializers.CharField()
-    price = serializers.IntegerField()
-    description = serializers.CharField()
+class BookProductSerializer(ProductSerializer):
+    name = serializers.CharField(source='book_title')
+    price = serializers.IntegerField(source='book_price')
+    description = serializers.CharField(source='book_description')
 
     class Meta:
-        model = ProductModel
+        model = Book
         fields = ('name', 'price', 'description')

@@ -13,6 +13,7 @@ from payment.models import PaymentErrorLog, Order
 
 User = get_user_model()
 
+
 class PNTestBase:
     available_pns = []
     invalid_fields = []
@@ -47,7 +48,8 @@ class PNTestBase:
     def create_order(self, **kwargs):
         if 'owner' not in kwargs:
             kwargs['owner'] = self.create_user()
-        kwargs['content_type'] = kwargs.get('content_type', ContentType.objects.get(app_label='product', model='ProductModel'))
+
+        kwargs['content_type'] = kwargs.get('content_type', ContentType.objects.get(app_label='product', model='book'))
         kwargs['object_id'] = kwargs.get('object_id', 1)
         return Order.objects.create(**kwargs)
 

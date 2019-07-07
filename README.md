@@ -70,60 +70,87 @@ PAYMENT = {
 }
 ```
 
+## 建立第一個產品
+
+### Book
+
+```python
+class Book(models.Model):
+    book_title = models.CharField(max_length=16)
+    book_description = models.CharField(max_length=16)
+    book_price = models.PositiveIntegerField()
+
+    is_active = models.BooleanField(default=False)
+
+class BookOwner(models.Model):
+    user = models.ForeignKey('auth.User')
+    book = models.ForeignKey(Book)
+
+```
+
+
+
 ## 取得產品資訊 (ProductSerializer)
 
 這玩意會把 Book的名字, 價格, 跟描述取出來, 接下來的就丟給
-基本上就名字, 價格, 描述3欄
+基本上就 [名字, 價格, 描述] 3欄
 
 ```python
 
-class ProductModelSerializer(ProductSerializer):
-    name = serializers.CharField()
-    price = serializers.IntegerField()
-    description = serializers.CharField()
+from rest_framework import serializers
+from payment.products import ProductSerializer
+from .models import Book
+
+
+class BookProductSerializer(ProductSerializer):
+    name = serializers.CharField(source='book_title')
+    price = serializers.IntegerField(source='book_price')
+    description = serializers.CharField(source='book_description')
 
     class Meta:
-        model = ProductModel
+        model = Book
+        # 產品的 Model
+
         fields = ('name', 'price', 'description')
+        # 基本上就需要這 3 欄而己
 
 ```
 
 
 ## 產品Class
 
-```
+```python
 from payment.products import Product
 
 
-class ProductOne(Product):
+class BookProduct(Product):
 
-    name = 'product_one'
+    name = 'book'
     # 產品的英文名字, 盡量只用SlugField的字元吧, 未來會強制使用slug
 
-    serializer_class = ProductModelSerializer
+    serializer_class = BookProductSerializer
     # 取得產品名字, 描述, 跟價錢的class
 
 
     return_view_name = 'return_page'
     # 付款完成後的訂單頁
-    # reverse(return_view_name, kwargs={'pk': order.pk})
+    # reverse('return_page', kwargs={'pk': order.pk})
 
 
     view_name = 'product_info'
-    # 產品的頁面的
-    # reverse(view_name, kwargs={'pk': product.pk})
+    # 產品頁面
+    # reverse('product_info', kwargs={'pk': product.pk})
 
     class Meta:
-        model = ProductModel
+        model = Book
 
-    def apply(self, user):
-        # 處理交易細節
-        item = self.item
-        item.buyers.add(user)
+    def apply(self, user, product):
+        # 處理交易內容
+        BookOwner.objects.create(user=user, book=product)
 
     def is_active(self):
         # 檢查產品是否可以購買
-        return self.item.is_active
+        return self.item.is_active and slef.item.book_price
 
 ```
 

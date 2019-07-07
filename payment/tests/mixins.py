@@ -42,6 +42,7 @@ class AccountMixin:
     def get_anonymous(self):
         return AnonymousUser()
 
+
 class ClientMixin(AccountMixin):
     def reverse(self, *args, **kwargs):
         return reverse(*args, **kwargs)

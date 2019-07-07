@@ -4,12 +4,12 @@ from payment.tests.mixins import AccountMixin
 from payment.pipes import receive_payment
 from payment.settings import backends
 from payment.models import Order
-from .products import OrderMixin
-from ..products import ProductOne
+from .test_products import OrderMixin
+from ..products import BookProduct
 
 
 class TestPipe(AccountMixin, OrderMixin, TestCase):
-    product_class = ProductOne
+    product_class = BookProduct
     backend = backends['ecpay_aio']
 
     def setUp(self):
