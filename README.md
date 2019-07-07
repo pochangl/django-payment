@@ -56,21 +56,27 @@ PAYMENT = {
         'product.products.ProductOne'
     ],
     'SUCCESS_PIPE': [
+        # 非必要
         # 無關產品本身的事件可以放這裡, 像是寄email通知之類的
         'product.pipes.increment'
     ]
 }
 ```
 
-BACKEND - <class list>
-    backend的位置
+## 取得產品資訊 (ProductSerializer)
 
-PRODUCTS - <class list>
-    產品的Handler, 
+```python
 
-SUCCESS_PIPE - <class list>
-    產品處理完後的動作
+class ProductModelSerializer(ProductSerializer):
+    name = serializers.CharField()
+    price = serializers.IntegerField()
+    description = serializers.CharField()
 
+    class Meta:
+        model = ProductModel
+        fields = ('name', 'price', 'description')
+
+```
 
 
 ## 產品Class
@@ -84,7 +90,7 @@ class ProductOne(Product):
     # 產品的英文名字, 盡量只用SlugField的字元吧, 未來會強制使用slug
     
     serializer_class = ProductModelSerializer
-    #
+    # 取得產品名字, 描述, 跟價錢的class
     
     
     return_view_name = 'return_page'
@@ -100,17 +106,20 @@ class ProductOne(Product):
         model = ProductModel
 
     def apply(self, user):
+        # 處理交易細節
         item = self.item
         item.buyers.add(user)
 
     def is_active(self):
-        return super().is_active() and self.item.is_active
+        # 檢查產品是否可以購買
+        return self.item.is_active
 
 ```
 
 ## url.py
 
-在最底層的url.py加入
+在最底層的url.py加入, 不要namespace
+
 ```python
 urlpatterns = [
     ...,
