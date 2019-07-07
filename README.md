@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 ## settings.py 檔
 
-## 加入綠界後端
+### 加入綠界後端
 
 
 TEST 指使用測試環境
@@ -45,7 +45,7 @@ PAYMENT_SETTINGS = {
 ```
 
 
-## 產品設定 settings.PAYMENT
+### 產品設定 settings.PAYMENT
 
 ```python
 PAYMENT = {
