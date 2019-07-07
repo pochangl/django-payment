@@ -1,17 +1,21 @@
 # django-payment
 Simple payment system for my django project
 
-
-## pip 安裝
+## 安裝
+### 方法1: pip 安裝
 ```bash
 pip install git+https://github.com/pochangl/django-payment.git@v0.1.6
 ```
 
-## requirements.txt
+### 方法2: requirements.txt 安裝
 
 在你的requirements.txt加入這行
 ```
 git+git://github.com/pochangl/django-payment.git@v0.1.6
+```
+
+```bash
+然後執行pip install -r requirements.txt
 ```
 
 ## 產品設定
