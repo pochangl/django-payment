@@ -11,7 +11,6 @@ setuptools.setup(
     url='https://github.com/pochangl/django-payment',
     install_requires=[
         'django',
-        'mysqlclient',
         'requests',
         'djangorestframework',
     ],
