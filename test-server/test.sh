@@ -9,7 +9,7 @@ cp -r /mnt/payment /payment
 
 cd /server
 
-pip install -e /payment
+pip install -e /mnt/payment
 echo 'running test'
-python manage.py makemigrations product
+python manage.py makemigrations
 python manage.py test --keepdb
