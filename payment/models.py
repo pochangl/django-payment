@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.shortcuts import reverse
 from django.utils.timezone import now
 
 
@@ -43,7 +42,7 @@ class PaymentErrorLog(TimeStampedModel):
 
 
 class Order(TimeStampedModel):
-    owner = models.ForeignKey('auth.User', related_name="orders")
+    owner = models.ForeignKey('auth.User', related_name="orders", on_delete=models.PROTECT)
 
     order_no = models.CharField(max_length=20, blank=True, unique=True,
                                 null=True)
@@ -60,7 +59,7 @@ class Order(TimeStampedModel):
     handled = models.BooleanField(default=False)
 
     # content
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 

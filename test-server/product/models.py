@@ -13,5 +13,5 @@ class Book(models.Model):
 
 
 class BookOwner(models.Model):
-    user = models.ForeignKey('auth.User')
-    book = models.ForeignKey(Book)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)

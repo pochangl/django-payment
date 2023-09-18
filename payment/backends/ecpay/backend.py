@@ -1,13 +1,11 @@
-import datetime
 import inspect
-import math
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError
 from requests import request
-from ..base import PaymentBackend, InvalidInput, InvalidPayment
+from ..base import PaymentBackend
 from .settings import settings
 from .forms import ECPayAIOPNForm, ECPayAIOLookUpForm, ECPayPayForm
-from .utils import decode_params, format_time
+from .utils import decode_params
 
 
 class ECPayAIOBackend(PaymentBackend):

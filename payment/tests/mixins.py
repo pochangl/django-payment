@@ -73,7 +73,7 @@ class ClientMixin(AccountMixin):
         if user is None:
             user = self.create_user()
 
-        if not user.is_anonymous():
+        if not user.is_anonymous:
             client.user = user
             client.credentials(HTTP_AUTHORIZATION='Token ' + user.auth_token.key)
 

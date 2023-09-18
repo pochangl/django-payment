@@ -15,7 +15,7 @@ from payment.backends.ecpay.utils import get_CheckMacValue
 from payment.backends.ecpay import forms
 from payment.models import Order, PaymentErrorLog
 from product.models import Book
-from django.core.urlresolvers import resolve, reverse
+from django.urls import resolve, reverse
 
 available_ecpay_pns = [
     {

@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory
 from django.test import Client
-from django.core.urlresolvers import reverse, resolve
+from django.urls import reverse, resolve
 from payment.models import PaymentErrorLog, Order
 
 User = get_user_model()

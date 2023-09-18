@@ -6,13 +6,14 @@ Created on Jan 12, 2014
 import datetime
 import hashlib
 import pytz
-import string
 import urllib
 from .settings import settings
 
 timezone = pytz.timezone('Asia/Taipei')
 
-def format_time(dt):
+def format_time(dt: datetime.datetime):
+    ts = dt.timestamp()
+    dt = datetime.datetime.utcfromtimestamp(ts).replace(tzinfo=pytz.utc)
     dt = timezone.normalize(dt)
     return dt.strftime(settings.DateTimeFormat)
 

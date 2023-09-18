@@ -1,9 +1,9 @@
-From python:3.6
+From python:3.10
 
-RUN pip install django==1.11.13
-RUN pip install mysqlclient==1.3.9
+RUN pip install django==4.2
+RUN pip install mysqlclient==1.4.6
 RUN pip install requests
-RUN pip install djangorestframework==3.6.2
+RUN pip install djangorestframework==3.14.0
 RUN pip install six
 
 RUN mkdir /server

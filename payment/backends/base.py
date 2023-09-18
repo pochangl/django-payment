@@ -5,7 +5,7 @@ Created on Jan 7, 2014
 '''
 import datetime
 import inspect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 class BackEndError(Exception):

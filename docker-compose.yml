@@ -2,7 +2,7 @@ version: '3.2'
 services:
   server:
     build: ./test-server
-    # command: sleep 10000000
+    command: /test.sh
     volumes:
       - ./test-server:/mnt/server
       - ./test-server/test.sh:/test.sh
